@@ -62,11 +62,11 @@ class WService:
         self.scmhandle = ws.OpenSCManager(machinename, dbname, ws.SC_MANAGER_ALL_ACCESS)
         self.sserv, self.lserv = self.checksvc()
         if (self.sserv or self.lserv) == None: sys.exit()
-        try:
-            self.handle = ws.OpenService(self.scmhandle, self.sserv, ws.SERVICE_ALL_ACCESS)
-            self.sccss = "SYSTEM\\CurrentControlSet\\Services\\"
-        except:
-            pass
+        #try:
+        self.handle = ws.OpenService(self.scmhandle, self.sserv, ws.SERVICE_ALL_ACCESS)
+        self.sccss = "SYSTEM\\CurrentControlSet\\Services\\"
+        #except:
+        #    pass
 
     def start(self):
         self.sserv, self.lserv = self.getname()
@@ -255,6 +255,7 @@ class WService:
                 return i[0], i[1]; break
             if i[1].lower() == self.userv.lower():
                 return i[0], i[1]; break
+        raise SyntaxError("Error: The %s service doesn't seem to exist." % self.userv)
         return None, None    
 
 if __name__ == '__main__':

@@ -2,13 +2,12 @@ import os
 import sys
 import argparse
 import string
-import conf
 import Cservice
-from iniparse import INIConfig
+import ConfigParser
 
 __author__ = "licface@yahoo.com"
 __version__ = "0.1"
-__test__ = "0.1"
+__test__ = "0.2"
 __sdk__ = "2.7"
 __platform_test__ = 'nt'
 
@@ -18,83 +17,151 @@ class maker:
         self.path = path
         self.email = email     
         self.masterpath = None
+        self.FILECONF = os.path.join(os.path.dirname(__file__),"conf.ini")
+        self.cfg = ConfigParser.RawConfigParser()
+        #self.cfg.add_section('PATH')
+        self.cfg.read(self.FILECONF)
+        self.cfgsave = ConfigParser.SafeConfigParser()
+        self.cfgsave.read(self.FILECONF)
+        
+    def writeconf(self,section,option,value):
+        self.cfgsave.set(section,option,value)
+        with open(self.FILECONF, 'w') as configfile:
+            self.cfgsave.write(configfile)                        
+            
+    def keymaker(self):
+        path = self.cfg.get('PATH','SSLPATH')
+        if os.path.isfile(os.path.join(str(path),self.host + ".crt")):
+            print "\n"
+            confr = raw_input(" File EXIST: (" + str(os.path.join(str(path),self.host + ".crt")) + "), Do you want to Overwrite file (y/n) ?: ")
+            if confr == 'y' or confr == "Y":
+                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")    
+                return True
+            elif confr == 'n' or confr == 'N':
+                pass
+            else:
+                print "\n"
+                print " You Not select y/n (SKIPPED)!"
+                return False
+        else:
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
+            return True
         
     def includeVhost(self):
-        cfg = INIConfig(file(os.path.join(os.path.dirname(__file__),"conf.ini")))
+        self.host = "mysqldb.net"
+        #print self.cfg.get('PATH','VHOST')
         self.qVPath()
-        f = open(cfg.PATH.VHOST,'a')
-        f.write("Include " + str(cfg.PATH.MASTER).replace("\\","/") + "/" + self.host + ".conf")
+        insertFile = "Include " + str(self.cfg.get('PATH','MASTER')).replace("\\","/")  + "/" + self.host + ".conf"
+        fd = open(self.qVPath(),'r+')
+        fdd = fd.readlines()
+        for i in fdd:
+            if insertFile in i:
+                print "\n"
+                print " " + str(insertFile) + " has been inserted !"
+                print "\n"
+                fd.close()
+                return False
+        f = open(self.qVPath(), 'a')
+        f.write("\n" + insertFile)
         f.close()
         return True
     
     def qMPath(self,path=None):
         if path == None:
-            cfg = INIConfig(file(os.path.join(os.path.dirname(__file__),"conf.ini")))
-            if os.path.isdir(cfg.PATH.MASTER):
-                return cfg.PATH.MASTER
+            if os.path.isdir(self.cfg.get('PATH','MASTER')):
+                return self.cfg.get('PATH','MASTER')
             else:
                 MPath = raw_input(" Please Definition Where Master Path to Write/Save File\n (example: /etc/apache/conf/extras|c:\apache\conf\extras): ")
-                cfg.PATH.MASTER = MPath
+                self.writeconf('PATH','MASTER',MPath)
                 return MPath
         else:
             path = path
+            self.writeconf('PATH','MASTER',path)
             return path
         
     def qVPath(self,path=None):
         if path == None:
-            cfg = INIConfig(file(os.path.join(os.path.dirname(__file__),"conf.ini")))
-            if os.path.isfile(cfg.PATH.VHOST):
-                return cfg.PATH.VHOST
+            if os.path.isfile(self.cfg.get('PATH','VHOST')):
+                return self.cfg.get('PATH','VHOST')
             else:
                 MPath = raw_input(" Please Definition Where Vhost Master Path to Write/Save File\n (example: /etc/apache/conf/extras/httpd-vhosts.conf|Apache2.4.4\conf\extra\httpd-vhosts.conf): ")
-                cfg.PATH.VHOST = MPath
+                self.writeconf('PATH','VHOST',MPath)
                 return MPath
         else:
             path = path
+            self.writeconf('PATH','VHOST',path)
             return path    
         
     def checkSVC(self,svcname):
-        cfg = INIConfig(file(os.path.join(os.path.dirname(__file__),"conf.ini")))
-        srvname = Cservice.WService(svcname)
-        if srvname.getname()[0] != None:
+        try:
+            srvname = Cservice.WService(svcname)
             if srvname.status() == "RUNNING":
-                s = raw_input(" Service %s is %s, Do you want to RESTART it (y/n): ")
+                s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
                 if s == "y" or s == "Y":
                     srvname.restart()
+                    print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                    return True
                 elif s == "n" or s == "N":
-                    pass
+                    print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"
+                    return True
                 else:
                     print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
                     print " You Not select y/n (SKIPPED)!"
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                    return False
+            elif srvname.status() == "STARTING":
+                print "\t Service " + str(svcname) + " is " + srvname.status()
+                print "\t Plase Wait a while ... "
             else:
-                s = raw_input(" Service %s is %s, Do you want to START it (y/n): ")
+                s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
                 if s == "y" or s == "Y":
                     srvname.start()
+                    print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                    return True
                 elif s == "n" or s == "N":
-                    pass
+                    print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"
+                    return True
                 else:
                     print "\n"
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\n"
                     print " You Not select y/n (SKIPPED)!"
-            return True
-        else:
+                    print "\n"
+                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                    return False
+            return True            
+        except SyntaxError:
             APath = raw_input(" Please Definition Web Server Service Name\n (example: apache2.4|httpd|xginx): ")
-            cfg.SERVER.SERVERSVC = str(APath)
-            self.checkSVC(APath)              
+            self.writeconf('SERVER','SERVERSVC',APath)
+            self.checkSVC(APath)    
         return False
     
-    def qAPath(self,servicename=None):
-        cfg = INIConfig(file(os.path.join(os.path.dirname(__file__),"conf.ini")))
-        if servicename == None:
-            if len(cfg.SERVER.SERVERSVC) > 1 or cfg.SERVER.SERVERSVC != None or cfg.SERVER.SERVERSVC != '':
-                svcname = Cservice.WService(cfg.SERVER.SERVERSVC)
-                self.checkSVC(svcname)
-            else:
+    def qAPath(self,sname=None):
+        if sname == None:
+            if len(self.cfg.get('SERVER','SERVERSVC')) < 1 or self.cfg.get('SERVER','SERVERSVC') == None or self.cfg.get('SERVER','SERVERSVC') == '':
                 APath = raw_input(" Please Definition Web Server Service Name\n (example: apache2.4|httpd|xginx): ")
-                cfg.SERVER.SERVERSVC = str(APath)
-                self.checkSVC(APath)              
+                self.writeconf('SERVER','SERVERSVC',APath)
+                self.checkSVC(APath)
+            else:
+                svcname = self.cfg.get('SERVER','SERVERSVC')
+                self.checkSVC(svcname)   
         else:
-            svcname = Cservice.WService(servicename)
-            self.checkSVC(svcname)
+            self.checkSVC(sname)
             
     def vhost(self, host,path,email="root@"):
         if self.host == None:
@@ -144,8 +211,12 @@ class maker:
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         self.keymaker()
+        #print self.includeVhost()
+        if self.includeVhost() == False:
+            pass
+        else:
+            self.includeVhost()
         self.qAPath()
-        self.includeVhost()
         
     def proxy(self,host,port,email="root@"):
         if self.host == None:
@@ -207,17 +278,14 @@ class maker:
 </VirtualHost>
 """%(port,self.email,self.host,port,self.host,port,self.host,self.host,self.host,self.host,port,self.host,self.host,self.host,port,self.host,port,self.host,self.host,self.host,self.host)
         proxyFile = open(os.path.join(self.masterpath,host)+".conf","w")
-        proxyFile.write(proxyNote)    
+        proxyFile.write(proxyNote) 
         self.keymaker()
+        if self.includeVhost() == False:
+            pass
+        else:
+            self.includeVhost()
         self.qAPath()
-        self.includeVhost()
         
-    def keymaker(self):
-        os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out d:\WWW\SSLCertificateKeyFile\\" + self.host + ".crt")
-        
-    def serviceConf(self):
-        serviceName = Cservice.WService()
-
     def usage(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-v","--verbosity", help="Show process running", action="store_true")
@@ -291,4 +359,5 @@ class maker:
 if __name__ == "__main__":
     vhostmaker = maker()
     vhostmaker.usage()
-    
+    #vhostmaker.checkSVC()
+    #vhostmaker.includeVhost()
