@@ -48,7 +48,6 @@ class maker:
             return True
         
     def includeVhost(self):
-        self.host = "mysqldb.net"
         #print self.cfg.get('PATH','VHOST')
         self.qVPath()
         insertFile = "Include " + str(self.cfg.get('PATH','MASTER')).replace("\\","/")  + "/" + self.host + ".conf"
