@@ -1,5 +1,5 @@
 Add Control Vhost & Proxy File Conf (Vhost,Proxy) Http Server for Apache Web Server
-=================================================+++++++++++++++++=================
+===================================================================================
 
 	usage: vhostmaker.py [-h] [-v] [-p PORT] [-e EMAIL] TYPE HOST
 
