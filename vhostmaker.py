@@ -6,9 +6,10 @@ import Cservice
 import ConfigParser
 
 __author__ = "licface@yahoo.com"
-__version__ = "0.1"
-__test__ = "0.2"
+__version__ = "1.0"
+__test__ = "1.0"
 __sdk__ = "2.7"
+__build__ =  "windows"
 __platform_test__ = 'nt'
 
 class maker:
@@ -209,6 +210,7 @@ class maker:
 """%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
+        vhostFile.close()
         self.keymaker()
         #print self.includeVhost()
         if self.includeVhost() == False:
@@ -224,11 +226,14 @@ class maker:
             self.email = email
         else:
             self.email = email + host
-        port_pre = str(str(host).split(":")[1]).strip()
-        if port_pre != None or port_pre != "":
-            port = port_pre
+        if ":" in  host:
+            port_pre = str(str(host).split(":")[1]).strip()
+            if port_pre != None or port_pre != "":
+                port = port_pre
+            else:
+                port = port
         else:
-            port = port
+            port = port        
 
         proxyNote = """<VirtualHost *:80>
 	<Proxy *:%s>
@@ -245,7 +250,7 @@ class maker:
 </VirtualHost>
 
 <VirtualHost *:443>
-        <Proxy *:$s>
+        <Proxy *:%s>
                 Require all granted
         </Proxy>
         SSLEngine on
@@ -276,8 +281,10 @@ class maker:
         CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
 """%(port,self.email,self.host,port,self.host,port,self.host,self.host,self.host,self.host,port,self.host,self.host,self.host,port,self.host,port,self.host,self.host,self.host,self.host)
-        proxyFile = open(os.path.join(self.masterpath,host)+".conf","w")
-        proxyFile.write(proxyNote) 
+        self.masterpath = self.qMPath()
+        proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
+        proxyFile.write(proxyNote)
+        proxyFile.close()
         self.keymaker()
         if self.includeVhost() == False:
             pass
@@ -290,23 +297,25 @@ class maker:
         parser.add_argument("-v","--verbosity", help="Show process running", action="store_true")
         parser.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
         parser.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
-        parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
-        parser.add_argument("PORT", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
-        parser.add_argument('EMAIL',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
+        #parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
+        parser.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
+        parser.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
 
         if len(sys.argv) < 2:
             print "\n"
             parser.print_help()
         else:
             if sys.argv[1] == "vhost":
-                parser2 = argparse.ArgumentParser()
-                parser2.add_argument("-v","--verbosity", help="Show process running", action="store_true")
-                parser2.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
-                parser2.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
-                parser2.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
+                #parser2 = argparse.ArgumentParser()
+                #parser2.add_argument("-v","--verbosity", help="Show process running", action="store_true")
+                #parser2.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
+                #parser2.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
+                #parser2.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 if len(sys.argv) > 2:
                     if len(sys.argv) > 3:
-                        args = parser2.parse_args()
+                        #args = parser2.parse_args()
+                        parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
+                        args = parser.parse_args()
                         if os.path.isdir(args.PATH):
                             self.vhost(args.HOST,args.PATH)
                         else:
@@ -325,20 +334,26 @@ class maker:
                     print "\n"                    
                     parser.print_help()
             elif sys.argv[1] == "proxy":
-                if os.path.isdir(sys.argv[2]):
-                    if isinstance(sys.argv[4], int):
-                        args = parser.parse_args()
-                        if args.email:
-                            if "@" in args.email:
-                                self.proxy(args.host, str(args.port), args.email)
+                args = parser.parse_args()
+                if args.HOST:
+                    if args.port:
+                        if isinstance(args.port, int):
+                            if args.email:
+                                if "@" in args.email:
+                                    self.proxy(args.HOST, str(args.port), args.email)
+                                else:
+                                    print "\n"
+                                    print "\t Please Insert Correct EMAIL !"
+                                    print "\n"
+                                    parser.print_help()
                             else:
-                                print "\n"
-                                print "\t Please Insert Correct EMAIL !"
-                                print "\n"
-                                parser.print_help()
+                                args = parser.parse_args()
+                                self.proxy(args.HOST, str(args.port))
                         else:
-                            args = parser.parse_args()
-                            self.proxy(args.host, str(args.port))                            
+                            print "\n"
+                            print "\tPlease insert PORT Number !"
+                            print "\n"
+                            parser.print_help()
                     else:
                         print "\n"
                         print "\tPlease insert PORT Number !"
@@ -346,9 +361,9 @@ class maker:
                         parser.print_help()
                 else:
                     print "\n"
-                    print "\tPlase Insert Correct PATH !"
+                    print "\tPlease insert HOST name !"
                     print "\n"
-                    parser.print_help()                    
+                    parser.print_help()                                    
             else:
                 print "\n"
                 print "\tPlase select your TYPE !"
