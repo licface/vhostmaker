@@ -8,11 +8,10 @@ Add Control Vhost & Proxy File Conf (Vhost,Proxy) Http Server for Apache Web Ser
 	  HOST                  Add host (example: myhost.com)
 
 	optional arguments:
-	  -h, --help            show this help message and exit
-	  -v, --verbosity       Show process running
-	  -p PORT, --port PORT  Port Proxy Reverse/Pass to used
-	  -e EMAIL, --email EMAIL
-							Email ServerAdmin (example: root@myhost.com), default:
+	  -h, --help              Show this help message and exit
+	  -v, --verbosity         Show process running
+	  -p PORT, --port PORT    Port Proxy Reverse/Pass to used
+	  -e EMAIL, --email EMAIL Email ServerAdmin (example: root@myhost.com), default:
 		
 	
 ### Credit & created by licface@yahoo.com ###
