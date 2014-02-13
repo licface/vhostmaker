@@ -178,6 +178,7 @@ class maker:
     ServerAdmin %s
     DocumentRoot "%s"
     ServerName %s
+    ServerAlias www.%s
     ErrorLog "logs/%s-error.log"
     CustomLog "logs/%s-access.log" common
 </VirtualHost>
@@ -207,7 +208,7 @@ class maker:
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
-"""%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
+"""%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         vhostFile.close()
@@ -311,10 +312,10 @@ class maker:
                 #parser2.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
                 #parser2.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
                 #parser2.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
+                parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 if len(sys.argv) > 2:
                     if len(sys.argv) > 3:
                         #args = parser2.parse_args()
-                        parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                         args = parser.parse_args()
                         if os.path.isdir(args.PATH):
                             self.vhost(args.HOST,args.PATH)
@@ -334,21 +335,27 @@ class maker:
                     print "\n"                    
                     parser.print_help()
             elif sys.argv[1] == "proxy":
-                args = parser.parse_args()
-                if args.HOST:
-                    if args.port:
-                        if isinstance(args.port, int):
-                            if args.email:
-                                if "@" in args.email:
-                                    self.proxy(args.HOST, str(args.port), args.email)
+                if len(sys.argv) > 2:
+                    args = parser.parse_args()
+                    if args.HOST:
+                        if args.port:
+                            if isinstance(args.port, int):
+                                if args.email:
+                                    if "@" in args.email:
+                                        self.proxy(args.HOST, str(args.port), args.email)
+                                    else:
+                                        print "\n"
+                                        print "\t Please Insert Correct EMAIL !"
+                                        print "\n"
+                                        parser.print_help()
                                 else:
-                                    print "\n"
-                                    print "\t Please Insert Correct EMAIL !"
-                                    print "\n"
-                                    parser.print_help()
+                                    args = parser.parse_args()
+                                    self.proxy(args.HOST, str(args.port))
                             else:
-                                args = parser.parse_args()
-                                self.proxy(args.HOST, str(args.port))
+                                print "\n"
+                                print "\tPlease insert PORT Number !"
+                                print "\n"
+                                parser.print_help()
                         else:
                             print "\n"
                             print "\tPlease insert PORT Number !"
@@ -356,14 +363,14 @@ class maker:
                             parser.print_help()
                     else:
                         print "\n"
-                        print "\tPlease insert PORT Number !"
+                        print "\tPlease insert HOST name !"
                         print "\n"
                         parser.print_help()
                 else:
                     print "\n"
                     print "\tPlease insert HOST name !"
-                    print "\n"
-                    parser.print_help()                                    
+                    print "\n"                    
+                    parser.print_help()
             else:
                 print "\n"
                 print "\tPlase select your TYPE !"
