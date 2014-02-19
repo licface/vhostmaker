@@ -6,7 +6,7 @@ import Cservice
 import ConfigParser
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.0"
+__version__ = "1.1"
 __test__ = "1.0"
 __sdk__ = "2.7"
 __build__ =  "windows"
@@ -163,7 +163,7 @@ class maker:
         else:
             self.checkSVC(sname)
             
-    def vhost(self, host,path,email="root@"):
+    def vhost(self, host,path,email="root@", dindex=None):
         if self.host == None:
             self.host = host
         if self.path == None:
@@ -174,7 +174,45 @@ class maker:
             self.email = email + host
 
         self.masterpath = self.qMPath()
-        vhostNote = """<VirtualHost *:80>
+        if dindex != None:
+            vhostNote = """<VirtualHost *:80>
+    ServerAdmin %s
+    DocumentRoot "%s"
+    ServerName %s
+    ServerAlias www.%s
+    ErrorLog "logs/%s-error.log"
+    CustomLog "logs/%s-access.log" common
+    DirectoryIndex %s
+</VirtualHost>
+            
+<VirtualHost *:443>
+    SSLEngine on
+    SSLProxyEngine off
+    SSLOptions +StrictRequire
+    SSLVerifyClient none
+    <Directory />
+        SSLRequireSSL
+    </Directory>
+            
+    SSLProtocol -all +TLSv1 +SSLv3
+    SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
+    SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
+    SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
+    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+    SSLSessionCacheTimeout 600   
+    <IfModule mime.c>
+        AddType application/x-x509-ca-cert      .crt
+        AddType application/x-pkcs7-crl         .crl
+    </IfModule>
+    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+    ServerName %s
+    ServerAlias www.%s
+    ErrorLog "logs/%s.https-error.log"
+    CustomLog "logs/%s.https-access.log" common
+</VirtualHost>
+"""%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
+        else:
+            vhostNote = """<VirtualHost *:80>
     ServerAdmin %s
     DocumentRoot "%s"
     ServerName %s
@@ -220,9 +258,11 @@ class maker:
             self.includeVhost()
         self.qAPath()
         
-    def proxy(self,host,port,email="root@"):
+    def proxy(self,host,port,email="root@", ip=None):
         if self.host == None:
             self.host = host
+        if ip == None:
+            ip = path = self.cfg.get('SERVER','HOST')
         if "root@" not in email:
             self.email = email
         else:
@@ -281,7 +321,7 @@ class maker:
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
-"""%(port,self.email,self.host,port,self.host,port,self.host,self.host,self.host,self.host,port,self.host,self.host,self.host,port,self.host,port,self.host,self.host,self.host,self.host)
+"""%(port,self.email,ip,port, ip,port,self.host,self.host,self.host, self.host,port,self.host,self.host,ip,port,ip,port,self.host,self.host,self.host,self.host)
         self.masterpath = self.qMPath()
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
@@ -313,12 +353,16 @@ class maker:
                 #parser2.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
                 #parser2.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
+                parser.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
                 if len(sys.argv) > 2:
                     if len(sys.argv) > 3:
                         #args = parser2.parse_args()
                         args = parser.parse_args()
                         if os.path.isdir(args.PATH):
-                            self.vhost(args.HOST,args.PATH)
+                            if args.directoryindex:
+                                self.vhost(args.HOST,args.PATH, dindex=args.directoryindex)
+                            else:
+                                self.vhost(args.HOST,args.PATH)
                         else:
                             print "\n"
                             print "\tPlease Insert Correct PATH !"
@@ -335,6 +379,7 @@ class maker:
                     print "\n"                    
                     parser.print_help()
             elif sys.argv[1] == "proxy":
+                parser.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=int)
                 if len(sys.argv) > 2:
                     args = parser.parse_args()
                     if args.HOST:
@@ -342,7 +387,10 @@ class maker:
                             if isinstance(args.port, int):
                                 if args.email:
                                     if "@" in args.email:
-                                        self.proxy(args.HOST, str(args.port), args.email)
+                                        if args.ip:
+                                            self.proxy(args.HOST, str(args.port), args.email, ip=args.ip)
+                                        else:
+                                            self.proxy(args.HOST, str(args.port), args.email)
                                     else:
                                         print "\n"
                                         print "\t Please Insert Correct EMAIL !"
@@ -350,7 +398,10 @@ class maker:
                                         parser.print_help()
                                 else:
                                     args = parser.parse_args()
-                                    self.proxy(args.HOST, str(args.port))
+                                    if args.ip:
+                                        self.proxy(args.HOST, str(args.port), ip=args.ip)
+                                    else:
+                                        self.proxy(args.HOST, str(args.port))
                             else:
                                 print "\n"
                                 print "\tPlease insert PORT Number !"
