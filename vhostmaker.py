@@ -6,8 +6,8 @@ import Cservice
 import ConfigParser
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.1"
-__test__ = "1.0"
+__version__ = "1.2"
+__test__ = "1.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -292,7 +292,7 @@ class maker:
 
 <VirtualHost *:443>
         <Proxy *:%s>
-                Require all granted
+            Require all granted
         </Proxy>
         SSLEngine on
         SSLProxyEngine off
@@ -338,8 +338,6 @@ class maker:
         parser.add_argument("-v","--verbosity", help="Show process running", action="store_true")
         parser.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
         parser.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
-        #parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
-        parser.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
         parser.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
 
         if len(sys.argv) < 2:
@@ -347,16 +345,10 @@ class maker:
             parser.print_help()
         else:
             if sys.argv[1] == "vhost":
-                #parser2 = argparse.ArgumentParser()
-                #parser2.add_argument("-v","--verbosity", help="Show process running", action="store_true")
-                #parser2.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
-                #parser2.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
-                #parser2.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 parser.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
                 if len(sys.argv) > 2:
                     if len(sys.argv) > 3:
-                        #args = parser2.parse_args()
                         args = parser.parse_args()
                         if os.path.isdir(args.PATH):
                             if args.directoryindex:
@@ -379,7 +371,8 @@ class maker:
                     print "\n"                    
                     parser.print_help()
             elif sys.argv[1] == "proxy":
-                parser.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=int)
+                parser.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
+                parser.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
                 if len(sys.argv) > 2:
                     args = parser.parse_args()
                     if args.HOST:
