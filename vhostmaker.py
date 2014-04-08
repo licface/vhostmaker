@@ -1,3 +1,4 @@
+#!/cygdrive/c/Python27/python.exe
 import os
 import sys
 import argparse
@@ -7,7 +8,7 @@ import ConfigParser
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.2"
-__test__ = "1.1"
+__test__ = "1.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -24,12 +25,12 @@ class maker:
         self.cfg.read(self.FILECONF)
         self.cfgsave = ConfigParser.SafeConfigParser()
         self.cfgsave.read(self.FILECONF)
-        
+
     def writeconf(self,section,option,value):
         self.cfgsave.set(section,option,value)
         with open(self.FILECONF, 'w') as configfile:
             self.cfgsave.write(configfile)                        
-            
+
     def keymaker(self):
         path = self.cfg.get('PATH','SSLPATH')
         if os.path.isfile(os.path.join(str(path),self.host + ".crt")):
@@ -47,7 +48,7 @@ class maker:
         else:
             os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
-        
+
     def includeVhost(self):
         #print self.cfg.get('PATH','VHOST')
         self.qVPath()
@@ -65,7 +66,7 @@ class maker:
         f.write("\n" + insertFile)
         f.close()
         return True
-    
+
     def qMPath(self,path=None):
         if path == None:
             if os.path.isdir(self.cfg.get('PATH','MASTER')):
@@ -78,7 +79,7 @@ class maker:
             path = path
             self.writeconf('PATH','MASTER',path)
             return path
-        
+
     def qVPath(self,path=None):
         if path == None:
             if os.path.isfile(self.cfg.get('PATH','VHOST')):
@@ -91,7 +92,7 @@ class maker:
             path = path
             self.writeconf('PATH','VHOST',path)
             return path    
-        
+
     def checkSVC(self,svcname):
         try:
             srvname = Cservice.WService(svcname)
@@ -150,7 +151,7 @@ class maker:
             self.writeconf('SERVER','SERVERSVC',APath)
             self.checkSVC(APath)    
         return False
-    
+
     def qAPath(self,sname=None):
         if sname == None:
             if len(self.cfg.get('SERVER','SERVERSVC')) < 1 or self.cfg.get('SERVER','SERVERSVC') == None or self.cfg.get('SERVER','SERVERSVC') == '':
@@ -162,8 +163,8 @@ class maker:
                 self.checkSVC(svcname)   
         else:
             self.checkSVC(sname)
-            
-    def vhost(self, host,path,email="root@", dindex=None):
+
+    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None):
         if self.host == None:
             self.host = host
         if self.path == None:
@@ -184,7 +185,7 @@ class maker:
     CustomLog "logs/%s-access.log" common
     DirectoryIndex %s
 </VirtualHost>
-            
+
 <VirtualHost *:443>
     SSLEngine on
     SSLProxyEngine off
@@ -193,7 +194,7 @@ class maker:
     <Directory />
         SSLRequireSSL
     </Directory>
-            
+
     SSLProtocol -all +TLSv1 +SSLv3
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
@@ -257,7 +258,7 @@ class maker:
         else:
             self.includeVhost()
         self.qAPath()
-        
+
     def proxy(self,host,port,email="root@", ip=None):
         if self.host == None:
             self.host = host
@@ -332,7 +333,7 @@ class maker:
         else:
             self.includeVhost()
         self.qAPath()
-        
+
     def usage(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-v","--verbosity", help="Show process running", action="store_true")
@@ -347,19 +348,20 @@ class maker:
             if sys.argv[1] == "vhost":
                 parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 parser.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
+                #parser.add_argument("-p",  "--pass",  help="Pass check Folder if is path/dir",  action="store_true")
                 if len(sys.argv) > 2:
                     if len(sys.argv) > 3:
                         args = parser.parse_args()
-                        if os.path.isdir(args.PATH):
-                            if args.directoryindex:
-                                self.vhost(args.HOST,args.PATH, dindex=args.directoryindex)
-                            else:
-                                self.vhost(args.HOST,args.PATH)
+                        #if os.path.isdir(args.PATH):
+                        if args.directoryindex:
+                            self.vhost(args.HOST, args.PATH, dindex=args.directoryindex, True)
                         else:
-                            print "\n"
-                            print "\tPlease Insert Correct PATH !"
-                            print "\n"
-                            parser.print_help()
+                            self.vhost(args.HOST, args.PATH)
+                            #else:
+                            #    print "\n"
+                            #    print "\tPlease Insert Correct PATH !"
+                            #    print "\n"
+                            #    parser.print_help()
                     else:
                         print "\n"
                         print "\tPlease Insert your PATH !"
@@ -420,7 +422,7 @@ class maker:
                 print "\tPlase select your TYPE !"
                 print "\n"
                 parser.print_help()
-                
+
 if __name__ == "__main__":
     vhostmaker = maker()
     vhostmaker.usage()
