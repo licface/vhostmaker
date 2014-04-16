@@ -7,11 +7,12 @@ import Cservice
 import ConfigParser
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.2"
-__test__ = "1.2"
+__version__ = "1.3"
+__test__ = "1.0"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
+__changelog__ = 'automatic key generator'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
@@ -26,10 +27,84 @@ class maker:
         self.cfgsave = ConfigParser.SafeConfigParser()
         self.cfgsave.read(self.FILECONF)
 
+    def get_key(self, bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password='', challengePassword=''):
+        key = """
+[req]
+default_bits           = %d
+default_keyfile        = %s.pem
+distinguished_name     = req_distinguished_name
+attributes             = req_attributes
+prompt                 = no
+output_password        = %s
+
+[req_distinguished_name]
+C                      = %s
+ST                     = %s
+L                      = %s
+O                      = %s
+OU                     = %s
+CN                     = %s
+emailAddress           = %s
+
+[req_attributes]
+challengePassword      = %s
+        """ % (bits, pem, output_password, C, ST, L, O, OU, CN, emailaddr, challengePassword)
+        return key
+
+    def make_key_config(self, bits, pem, OU, CN, emailaddr, C='XX', ST='WestLand', L='NeveLand', O='LICFACE', output_password='', challengePassword=''):
+        data = self.get_key(bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password, challengePassword)
+        path = os.path.join(os.getenv('TEMP'), CN + "_temp.key")
+        f = open(path, "w")
+        f.write(data)
+        f.close()
+        return path
+
     def writeconf(self,section,option,value):
         self.cfgsave.set(section,option,value)
         with open(self.FILECONF, 'w') as configfile:
-            self.cfgsave.write(configfile)                        
+            self.cfgsave.write(configfile)
+
+    def get_OU(self, host):
+        d3 = ''
+        if 'www.' in host:
+            d1 = str(host).split('www') #['www', 'xxx.com']
+            if len(d1) > 1:
+                if "." in d1[1]:
+                    d2 = str(d1[1]).split(".") #['xxx', 'com']
+                    if len(d2[-1]) == 2 or len(d2[-1]) == 3:
+                        for i in range(0, len(d2) - 1):
+                            d3 = d3 + d2[i]
+                    else:
+                        for i in range(0, len(d2)):
+                            d3 = d3 + d2[i]
+                else:
+                    return d1[1]
+            else:
+                return False
+        else:
+            if "." in host:
+                d2 = str(host).split('.') #['xxx', 'com']
+                if len(d2[-1]) == 2 or len(d2[-1]) == 3:
+                    for i in range(0, len(d2) - 1):
+                        d3 = d3 + d2[i]                        
+                else:
+                    for i in range(0, len(d2)):
+                        d3 = d3 + d2[i]#print "d3 =", d3                        
+            else:
+                return host
+        return d3
+
+    def get_email(self, host, mailaccount):
+        d3 = ''
+        if 'www.' in host:
+            d1 = str(host).split('www') #['www', 'xxx.com']
+            if len(d1) > 1:
+                d3 = str(mailaccount) + '@' + d1[1]
+            else:
+                return False
+        else:
+            d3 = str(mailaccount) + '@' + host
+        return d3    
 
     def keymaker(self):
         path = self.cfg.get('PATH','SSLPATH')
@@ -37,7 +112,18 @@ class maker:
             print "\n"
             confr = raw_input(" File EXIST: (" + str(os.path.join(str(path),self.host + ".crt")) + "), Do you want to Overwrite file (y/n) ?: ")
             if confr == 'y' or confr == "Y":
-                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")    
+                DOU = self.get_OU(self.host)
+                DMail = self.get_email(self.host, 'root')
+                if DOU != False:
+                    OU = self.get_OU(self.host)
+                else:
+                    raise SyntaxWarning('Error making key (OU) ....')
+                if DMail != False:
+                    Mail = self.get_email(self.host, 'root')
+                else:
+                    raise SyntaxWarning('Error making key (Mail) ....')                
+                cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
+                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)    
                 return True
             elif confr == 'n' or confr == 'N':
                 pass
@@ -46,7 +132,19 @@ class maker:
                 print " You Not select y/n (SKIPPED)!"
                 return False
         else:
-            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
+            DOU = self.get_OU(self.host)
+            DMail = self.get_email(self.host, 'root')
+            if DOU != False:
+                OU = self.get_OU(self.host)
+            else:
+                raise SyntaxWarning('Error making key (OU) ....')
+            if DMail != False:
+                Mail = self.get_email(self.host, 'root')
+            else:
+                raise SyntaxWarning('Error making key (Mail) ....')                
+            cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)          
+            #os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
 
     def includeVhost(self):
@@ -164,7 +262,7 @@ class maker:
         else:
             self.checkSVC(sname)
 
-    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None):
+    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, verbosity=None):
         if self.host == None:
             self.host = host
         if self.path == None:
@@ -354,7 +452,7 @@ class maker:
                         args = parser.parse_args()
                         #if os.path.isdir(args.PATH):
                         if args.directoryindex:
-                            self.vhost(args.HOST, args.PATH, dindex=args.directoryindex, True)
+                            self.vhost(args.HOST, args.PATH, dindex=args.directoryindex, verbosity=True)
                         else:
                             self.vhost(args.HOST, args.PATH)
                             #else:
@@ -426,5 +524,7 @@ class maker:
 if __name__ == "__main__":
     vhostmaker = maker()
     vhostmaker.usage()
+    #print vhostmaker.get_key(1024, "rere", "ID", "WestJava", "Bandung", "LICFACE", "licface.net", "www.licface.net", "root@licface.net")
+    #print vhostmaker.get_OU('licface')
     #vhostmaker.checkSVC()
     #vhostmaker.includeVhost()
