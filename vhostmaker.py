@@ -1,13 +1,14 @@
-#!/cygdrive/c/Python27/python.exe
 import os
 import sys
 import argparse
 import string
 import Cservice
 import ConfigParser
+import subprocess
+import addhostx as addhost
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.3"
+__version__ = "1.4"
 __test__ = "1.0"
 __sdk__ = "2.7"
 __build__ =  "windows"
@@ -262,7 +263,7 @@ challengePassword      = %s
         else:
             self.checkSVC(sname)
 
-    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, verbosity=None):
+    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, adddns=None, verbosity=None):
         if self.host == None:
             self.host = host
         if self.path == None:
@@ -349,6 +350,8 @@ challengePassword      = %s
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         vhostFile.close()
+        if adddns == None:
+            addhost.main(self.host)
         self.keymaker()
         #print self.includeVhost()
         if self.includeVhost() == False:
@@ -357,7 +360,7 @@ challengePassword      = %s
             self.includeVhost()
         self.qAPath()
 
-    def proxy(self,host,port,email="root@", ip=None):
+    def proxy(self,host,port,email="root@", ip=None, adddns=None):
         if self.host == None:
             self.host = host
         if ip == None:
@@ -425,6 +428,8 @@ challengePassword      = %s
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
         proxyFile.close()
+        if adddns == None:
+            addhost.main(self.host)
         self.keymaker()
         if self.includeVhost() == False:
             pass
@@ -438,12 +443,14 @@ challengePassword      = %s
         parser.add_argument('TYPE', help="Type (vhost|proxy)", action="store", type=str)
         parser.add_argument("HOST", help="Add host (example: myhost.com)", action="store", type=str)
         parser.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
+        parser.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
+        parser.add_argument('-n', '--nodns', help="Not generate DNS Host", action="store_true")
 
         if len(sys.argv) < 2:
             print "\n"
             parser.print_help()
         else:
-            if sys.argv[1] == "vhost":
+            if sys.argv[1] == "vhost": #Virtual Host (VHOST)
                 parser.add_argument("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
                 parser.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
                 #parser.add_argument("-p",  "--pass",  help="Pass check Folder if is path/dir",  action="store_true")
@@ -452,9 +459,10 @@ challengePassword      = %s
                         args = parser.parse_args()
                         #if os.path.isdir(args.PATH):
                         if args.directoryindex:
-                            self.vhost(args.HOST, args.PATH, dindex=args.directoryindex, verbosity=True)
+                            self.vhost(args.HOST, args.PATH, dindex=args.directoryindex, 
+adddns=args.nodns, verbosity=True)
                         else:
-                            self.vhost(args.HOST, args.PATH)
+                            self.vhost(args.HOST, args.PATH, adddns=args.nodns)
                             #else:
                             #    print "\n"
                             #    print "\tPlease Insert Correct PATH !"
@@ -470,7 +478,7 @@ challengePassword      = %s
                     print "\tPlease Insert HOST name !"
                     print "\n"                    
                     parser.print_help()
-            elif sys.argv[1] == "proxy":
+            elif sys.argv[1] == "proxy": #Proxy
                 parser.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
                 parser.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
                 if len(sys.argv) > 2:
@@ -481,9 +489,10 @@ challengePassword      = %s
                                 if args.email:
                                     if "@" in args.email:
                                         if args.ip:
-                                            self.proxy(args.HOST, str(args.port), args.email, ip=args.ip)
+                                            self.proxy(args.HOST, str(args.port), args.email, 
+ip=args.ip, adddns=args.nodns)
                                         else:
-                                            self.proxy(args.HOST, str(args.port), args.email)
+                                            self.proxy(args.HOST, str(args.port), args.email, adddns=args.nodns)
                                     else:
                                         print "\n"
                                         print "\t Please Insert Correct EMAIL !"
@@ -524,6 +533,8 @@ challengePassword      = %s
 if __name__ == "__main__":
     vhostmaker = maker()
     vhostmaker.usage()
+    #subprocess.Popen([addhost.main([str(sys.argv[1])])])
+    #addhost.main([sys.argv[1]])
     #print vhostmaker.get_key(1024, "rere", "ID", "WestJava", "Bandung", "LICFACE", "licface.net", "www.licface.net", "root@licface.net")
     #print vhostmaker.get_OU('licface')
     #vhostmaker.checkSVC()
