@@ -9,7 +9,7 @@ import addhostx as addhost
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.4"
-__test__ = "1.1"
+__test__ = "1.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -428,7 +428,7 @@ challengePassword      = %s
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
         proxyFile.close()
-        if adddns == False:
+        if adddns == False pr adddns == None:
             addhost.main(self.host)
         self.keymaker()
         if self.includeVhost() == False:
