@@ -9,7 +9,7 @@ import addhostx as addhost
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.4"
-__test__ = "1.0"
+__test__ = "1.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -350,7 +350,7 @@ challengePassword      = %s
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         vhostFile.close()
-        if adddns == None:
+        if adddns == False:
             addhost.main(self.host)
         self.keymaker()
         #print self.includeVhost()
@@ -428,7 +428,7 @@ challengePassword      = %s
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
         proxyFile.close()
-        if adddns == None:
+        if adddns == False:
             addhost.main(self.host)
         self.keymaker()
         if self.includeVhost() == False:
@@ -445,7 +445,6 @@ challengePassword      = %s
         parser.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
         parser.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
         parser.add_argument('-n', '--nodns', help="Not generate DNS Host", action="store_true")
-
         if len(sys.argv) < 2:
             print "\n"
             parser.print_help()
