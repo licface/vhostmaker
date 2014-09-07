@@ -1,18 +1,21 @@
 Add Control Vhost & Proxy File Conf (Vhost,Proxy) Http Server for Apache Web Server
 ===================================================================================
 
-	usage: vhostmaker.py [-h] [-v] [-p PORT] [-e EMAIL] TYPE HOST
+    Usage: vhostmaker.py [options]
 
-	positional arguments:
-	  TYPE                  Type (vhost|proxy)
-	  HOST                  Add host (example: myhost.com)
+    Options:
+        -h, --help            show this help message and exit
+        -v, --verbosity       Show process running
+        -V, --version         Show version
+        -e EMAIL, --email=EMAIL
+            Email ServerAdmin (example: root@myhost.com), default:
+            root@HOST
+        -n, --nodns           Not add/generate DNS Host
+        -a IP, --ip=IP        IP Host Proxy Reverse/Pass to used
+        -p PORT, --port=PORT  Port Proxy Reverse/Pass to used
+        -i DIRECTORYINDEX, --directoryindex=DIRECTORYINDEX
+            Add section "DirectoryIndex"
+        -q, --quiet           bypass All of confirmation
 
-	optional arguments:
-	  -h, --help              Show this help message and exit
-	  -v, --verbosity         Show process running
-	  -p PORT, --port PORT    Port Proxy Reverse/Pass to used
-	  -e EMAIL, --email EMAIL Email ServerAdmin (example: root@myhost.com), default:
-		
-	
+
 ### Credit & created by licface@yahoo.com ###
-	
