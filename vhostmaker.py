@@ -269,7 +269,7 @@ challengePassword      = %s
             if srvname.status() == "RUNNING":
                 if quiet:
                     s = "y"
-                    print "Service " + str(svcname) + " is RUNNING and will be RESTART it !: "
+                    print " Service " + str(svcname) + " is RUNNING and will be RESTART it !: "
                 else:
                     s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
                 if s == "y" or s == "Y":
@@ -299,7 +299,7 @@ challengePassword      = %s
             else:
                 if quiet:
                     s = "y"
-                    print "Service " + str(svcname) + " is STOPPED and will be START it !: "
+                    print " Service " + str(svcname) + " is %s and will be START it !: " % (str(srvname.status()))
                 else:
                     s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
                 if s == "y" or s == "Y":
@@ -343,7 +343,6 @@ challengePassword      = %s
             self.checkSVC(sname, quiet)
 
     def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, adddns=None, verbosity=None, quiet=None):
-        print "quiet 1 =", quiet
         if self.host == None:
             self.host = host
         if self.path == None:
@@ -520,18 +519,13 @@ challengePassword      = %s
         parser = optparse.OptionParser()
         parser.add_option("-v","--verbosity", help="Show process running", action="store_true")
         parser.add_option("-V","--version", help="Show version", action="store_true")
-        #parser.add_option('TYPE', help="Type (vhost|proxy)", action="store", type=str)
-        #parser.add_option("HOST", help="Add host (example: myhost.com)", action="store", type=str)
         parser.add_option('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
         parser.add_option('-n', '--nodns', help="Not add/generate DNS Host", action="store_true")
         parser.add_option('-a', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
         parser.add_option('-p', "--port", help="Port Proxy Reverse/Pass to used ",action="store", type=int, default=80)
-        #parser.add_option("PATH", help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str)
         parser.add_option("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
         parser.add_option("-q", "--quiet", help="bypass All of confirmation", action="store_true")
         args, argv = parser.parse_args()
-        print "args =", args
-        print "argv =", argv
         if args.version:
             print "Version:", __version__+"("+__test__+")"
         if len(sys.argv) < 2:
@@ -539,21 +533,18 @@ challengePassword      = %s
             parser.print_help()
         else:
             if str("vhost").strip() in argv:
-                #print "AAAAAAAAAAAAAAAAA"
                 if len(argv) > 2:
                     dir_temp = []
                     for i in argv:
                         if os.path.isdir(i):
                             dir_temp.append(i)
-                    #print "dir_temp =", dir_temp
                     if len(dir_temp) > 1:
                         return "\tPlease make sure where is data web stored !"
                     else:
                         PATH = dir_temp[0]
                     for a in argv:
                         if  "." in a:
-                            HOST = a
-                    #print "HOST =", HOST            
+                            HOST = a           
                     if args.directoryindex:
                         self.vhost(HOST, PATH, dindex=args.directoryindex, 
 adddns=args.nodns, verbosity=True, quiet=args.quiet)
