@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-#import argparse
 import optparse
 import string
 import Cservice
@@ -12,11 +11,11 @@ import sendgrowl
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.5"
-__test__ = "0.1"
+__test__ = "0.3"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'remove argparse and change with optparse with quiet support'
+__changelog__ = 'repair proxy option'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
@@ -26,7 +25,6 @@ class maker:
         self.masterpath = None
         self.FILECONF = os.path.join(os.path.dirname(__file__),"conf.ini")
         self.cfg = ConfigParser.RawConfigParser()
-        #self.cfg.add_section('PATH')
         self.cfg.read(self.FILECONF)
         self.cfgsave = ConfigParser.SafeConfigParser()
         self.cfgsave.read(self.FILECONF)
@@ -198,13 +196,16 @@ challengePassword      = %s
         insertFile = "Include " + str(self.cfg.get('PATH','MASTER')).replace("\\","/")  + "/" + self.host + ".conf"
         fd = open(self.qVPath(),'r+')
         fdd = fd.readlines()
+        check_insert = []
         for i in fdd:
             if insertFile in i:
                 print "\n"
                 print " " + str(insertFile) + " has been inserted !"
                 print "\n"
                 fd.close()
-                return False
+                #return False
+                check_insert.append(True)
+        if len(check_insert) > 0:pass
         f = open(self.qVPath(), 'a')
         f.write("\n" + insertFile)
         f.close()
@@ -428,7 +429,7 @@ challengePassword      = %s
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         vhostFile.close()
-        if adddns == False:
+        if adddns == None:
             addhost.main(self.host)
         self.keymaker(quiet=quiet)
         #print self.includeVhost()
@@ -505,8 +506,8 @@ challengePassword      = %s
         self.masterpath = self.qMPath()
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
-        proxyFile.close()
-        if adddns == False or adddns == None:
+        proxyFile.close()    
+        if adddns == None:
             addhost.main(self.host)
         self.keymaker(quiet=quiet)
         if self.includeVhost() == False:
@@ -517,8 +518,8 @@ challengePassword      = %s
 
     def usage(self):
         parser = optparse.OptionParser()
-        parser.add_option("-v","--verbosity", help="Show process running", action="store_true")
-        parser.add_option("-V","--version", help="Show version", action="store_true")
+        parser.add_option("-v", "--verbosity", help="Show process running", action="store_true")
+        parser.add_option("-V", "--version", help="Show version", action="store_true")
         parser.add_option('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='')
         parser.add_option('-n', '--nodns', help="Not add/generate DNS Host", action="store_true")
         parser.add_option('-a', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
@@ -527,12 +528,15 @@ challengePassword      = %s
         parser.add_option("-q", "--quiet", help="bypass All of confirmation", action="store_true")
         args, argv = parser.parse_args()
         if args.version:
-            print "Version:", __version__+"("+__test__+")"
+            print "\n"
+            print "\tVersion:", __version__+"("+__test__+")"
         if len(sys.argv) < 2:
             print "\n"
             parser.print_help()
         else:
-            if str("vhost").strip() in argv:
+            if args.verbosity or args.version or args.email or args.nodns or args.ip or args.port or args.directoryindex or args.quiet:
+                pass
+            elif str("vhost").strip() in argv:
                 if len(argv) > 2:
                     dir_temp = []
                     for i in argv:
@@ -554,7 +558,7 @@ adddns=args.nodns, verbosity=True, quiet=args.quiet)
                     parser.print_help()
                         
             elif str("proxy").strip() in argv: #Proxy
-                if len(argv) > 2:
+                if len(argv) > 1:
                     dir_temp = []
                     for i in argv:
                         if os.path.isdir(i):
