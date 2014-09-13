@@ -15,6 +15,7 @@ else:
     clr.AddReference("SDNSAPI")
 from JHSoftware.SimpleDNSPlus import *
 import sendgrow
+import System
 
 __version__ = "3.1"
 __test__ = "1.0"
@@ -85,20 +86,27 @@ class simplednshostadd:
         if datax == None or datax == "" or len(datax[0]) == 0:
             print usage(True)
         else:
-            if "www." in datax[0]:	
-                print "\t Sorry !, you can't add zone with preffix \"www.\", please remove \"www.\"\n"
-                print usage
-            else:
-                #(hostname, ipFtp, ipMail, ipWWW, ipA, ipMX, remote_host, remote_port, remote_password, email)
-                #print "datax 1 =", datax
-                Zone = self.conn.CreateZone(datax[0], str(datax[4]), str(datax[-1]))
-                #print "datax[1] =", datax[1]
-                Zone.Records.Add("ftp."+ datax[0], "A", [str(datax[1])])
-                Zone.Records.Add("mail."+ datax[0], "A", [str(datax[2])])
-                Zone.Records.Add("www."+ datax[0], "CNAME", [datax[3]])
-                Zone.Records.Add(datax[0], "A", [str(datax[4])])
-                Zone.Records.Add(datax[0], "MX", "10", "mail."+ datax[4])
-                self.conn.UpdateZone(Zone, True)       
+            try:
+                if "www." in datax[0]:	
+                    print "\t Sorry !, you can't add zone with preffix \"www.\", please remove \"www.\"\n"
+                    print usage
+                else:
+                    #(hostname, ipFtp, ipMail, ipWWW, ipA, ipMX, remote_host, remote_port, remote_password, email)
+                    #print "datax 1 =", datax
+                    Zone = self.conn.CreateZone(datax[0], str(datax[4]), str(datax[-1]))
+                    #print "datax[1] =", datax[1]
+                    Zone.Records.Add("ftp."+ datax[0], "A", [str(datax[1])])
+                    Zone.Records.Add("mail."+ datax[0], "A", [str(datax[2])])
+                    Zone.Records.Add("www."+ datax[0], "CNAME", [datax[3]])
+                    Zone.Records.Add(datax[0], "A", [str(datax[4])])
+                    Zone.Records.Add(datax[0], "MX", "10", "mail."+ datax[4])
+                    self.conn.UpdateZone(Zone, True)
+            except System.Net.WebException:
+                print "\n"
+                print "\t Can't Connect to DNS Server(SimpleDNS Server) !"
+                os._exit(1)
+                return False
+            
 
     def add(self, hostname, remote_port=8053, ipA=None, ipNS=None, ipWWW=None, ipMX=None, ipFtp=None, ipMail=None, remote_host=None, password=None, email=None, datax=None, verbosity=None):
         data_to = []
