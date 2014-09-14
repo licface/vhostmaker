@@ -11,10 +11,11 @@ import sendgrowl
 import logging
 import inspect
 import threading
+import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.6"
-__test__ = "0.1"
+__test__ = "0.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -361,135 +362,156 @@ challengePassword      = %s
         else:
             self.checkSVC(sname, quiet)
             
-    def logme(self, msg, verbosity=None, log_type=None):
+    def logme(self, msg, verbosity=None, log_type=None, exc_info=None):
         myextra = {'myline': str(inspect.currentframe().f_back.f_lineno)}
         if verbosity == True:
             if log_type == 'info':
                 self.logger.setLevel(logging.INFO)
                 self.logg.setLevel(logging.INFO)
-                return self.logger.info(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.info('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.info(msg, extra=myextra)
             elif log_type == 'warning':
                 self.logger.setLevel(logging.WARNING)
                 self.logg.setLevel(logging.WARNING)
-                return self.logger.warning(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.warning('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.warning(msg, extra=myextra)
             elif log_type == 'error':
                 print "SSSS"
                 self.logger.setLevel(logging.ERROR)
                 self.logg.setLevel(logging.ERROR)
                 print "msg error =", msg
-                return self.logger.error(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.error('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.error(msg, extra=myextra)
             elif log_type == 'critical':
                 self.logger.setLevel(logging.CRITICAL)
                 self.logg.setLevel(logging.CRITICAL)
-                return self.loggercritical(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.critical('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.critical(msg, extra=myextra)
             elif log_type == 'debug':
                 self.logger.setLevel(logging.DEBUG)
                 self.logg.setLevel(logging.DEBUG)
-                return self.logger.debug(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.debug('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.debug(msg, extra=myextra)
             else:
                 self.logger.setLevel(logging.DEBUG)
                 self.logg.setLevel(logging.DEBUG)
-                return self.logger.debug(msg, extra=myextra)
+                if exc_info:
+                    return self.logger.debug('Error: %s'% exc, exc_info=True, extra=myextra)
+                else:
+                    return self.logger.debug(msg, extra=myextra)
 
     def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, adddns=None, verbosity=None, quiet=None):
-        if self.host == None:
-            self.host = host
-        if self.path == None:
-            self.path = path
-        if "root@" not in email:
-            self.email = email
-        else:
-            self.email = email + host
-        self.masterpath = self.qMPath()
-        if dindex != None:
-            vhostNote = """<VirtualHost *:80>
-    ServerAdmin %s
-    DocumentRoot "%s"
-    ServerName %s
-    ServerAlias www.%s
-    ErrorLog "logs/%s-error.log"
-    CustomLog "logs/%s-access.log" common
-    DirectoryIndex %s
-</VirtualHost>
-
-<VirtualHost *:443>
-    SSLEngine on
-    SSLProxyEngine off
-    SSLOptions +StrictRequire
-    SSLVerifyClient none
-    <Directory />
-        SSLRequireSSL
-    </Directory>
-
-    SSLProtocol -all +TLSv1 +SSLv3
-    SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-    SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
-    SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
-    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
-    SSLSessionCacheTimeout 600   
-    <IfModule mime.c>
-        AddType application/x-x509-ca-cert      .crt
-        AddType application/x-pkcs7-crl         .crl
-    </IfModule>
-    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
-    ServerName %s
-    ServerAlias www.%s
-    ErrorLog "logs/%s.https-error.log"
-    CustomLog "logs/%s.https-access.log" common
-</VirtualHost>
-"""%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
-        else:
-            vhostNote = """<VirtualHost *:80>
-    ServerAdmin %s
-    DocumentRoot "%s"
-    ServerName %s
-    ServerAlias www.%s
-    ErrorLog "logs/%s-error.log"
-    CustomLog "logs/%s-access.log" common
-</VirtualHost>
-
-<VirtualHost *:443>
+        try:
+            if self.host == None:
+                self.host = host
+            if self.path == None:
+                self.path = path
+            if "root@" not in email:
+                self.email = email
+            else:
+                self.email = email + host
+            self.masterpath = self.qMPath()
+            if dindex != None:
+                vhostNote = """<VirtualHost *:80>
+        ServerAdmin %s
+        DocumentRoot "%s"
+        ServerName %s
+        ServerAlias www.%s
+        ErrorLog "logs/%s-error.log"
+        CustomLog "logs/%s-access.log" common
+        DirectoryIndex %s
+    </VirtualHost>
+    
+    <VirtualHost *:443>
         SSLEngine on
         SSLProxyEngine off
         SSLOptions +StrictRequire
         SSLVerifyClient none
-    <Directory />
-        SSLRequireSSL
-    </Directory>
-
-    SSLProtocol -all +TLSv1 +SSLv3
-    SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
+        <Directory />
+            SSLRequireSSL
+        </Directory>
+    
+        SSLProtocol -all +TLSv1 +SSLv3
+        SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
         SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
         #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
         SSLSessionCacheTimeout 600   
         <IfModule mime.c>
-        AddType application/x-x509-ca-cert      .crt
-        AddType application/x-pkcs7-crl         .crl
-    </IfModule>
+            AddType application/x-x509-ca-cert      .crt
+            AddType application/x-pkcs7-crl         .crl
+        </IfModule>
         SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
         ServerName %s
         ServerAlias www.%s
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
-</VirtualHost>
-"""%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
-        self.logme('open file vhost mode: write', verbosity, 'info')
-        vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
-        self.logme('write file vhost', verbosity, 'info')
-        vhostFile.write(vhostNote)
-        self.logme('close file vhost', verbosity, 'info')
-        vhostFile.close()
-        if adddns == None:
-            self.logme('add host', verbosity, 'info')
-            addhost.main(self.host)
-        self.logme('make SSL Key', verbosity, 'info')
-        self.keymaker(quiet=quiet)
-        #print self.includeVhost()
-        self.logme('Verify file vhost apache config', verbosity, 'info')
-        if self.includeVhost(verbosity=verbosity) == True:
-            self.includeVhost(verbosity=verbosity)
-        self.qAPath(quiet=quiet)
+    </VirtualHost>
+    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
+            else:
+                vhostNote = """<VirtualHost *:80>
+        ServerAdmin %s
+        DocumentRoot "%s"
+        ServerName %s
+        ServerAlias www.%s
+        ErrorLog "logs/%s-error.log"
+        CustomLog "logs/%s-access.log" common
+    </VirtualHost>
+    
+    <VirtualHost *:443>
+            SSLEngine on
+            SSLProxyEngine off
+            SSLOptions +StrictRequire
+            SSLVerifyClient none
+        <Directory />
+            SSLRequireSSL
+        </Directory>
+    
+        SSLProtocol -all +TLSv1 +SSLv3
+        SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
+            SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
+            SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
+            #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+            SSLSessionCacheTimeout 600   
+            <IfModule mime.c>
+            AddType application/x-x509-ca-cert      .crt
+            AddType application/x-pkcs7-crl         .crl
+        </IfModule>
+            SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+            ServerName %s
+            ServerAlias www.%s
+            ErrorLog "logs/%s.https-error.log"
+            CustomLog "logs/%s.https-access.log" common
+    </VirtualHost>
+    """%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
+            self.logme('open file vhost mode: write', verbosity, 'info')
+            vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
+            self.logme('write file vhost', verbosity, 'info')
+            vhostFile.write(vhostNote)
+            self.logme('close file vhost', verbosity, 'info')
+            vhostFile.close()
+            if adddns == None:
+                self.logme('add host', verbosity, 'info')
+                addhost.main(self.host)
+            self.logme('make SSL Key', verbosity, 'info')
+            self.keymaker(quiet=quiet)
+            #print self.includeVhost()
+            self.logme('Verify file vhost apache config', verbosity, 'info')
+            if self.includeVhost(verbosity=verbosity) == True:
+                self.includeVhost(verbosity=verbosity)
+            self.qAPath(quiet=quiet)
+        except:
+            self.logme('', verbosity, 'error', True)
 
     def proxy(self,host,port,email="root@", ip=None, adddns=None, quiet=None, verbosity=None):
         try:
