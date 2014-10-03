@@ -12,18 +12,20 @@ import logging
 import inspect
 import threading
 import traceback
+import win32serviceutil
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.6"
-__test__ = "0.2"
+__version__ = "1.7"
+__test__ = "0.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'repair all of verbosity, add logging details'
-__build_date__ = '2014-09-13: 10:35:20'
+__changelog__ = 'make control service with pywin32, pywin32 dependenci must installed before !'
+__build_date__ = '2014-10-03: 10:31:20'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
+        self.apachesvc_name = 'apache249'
         self.host = host
         self.path = path
         self.email = email     
@@ -274,6 +276,11 @@ challengePassword      = %s
             self.writeconf('PATH','VHOST',path)
             return path    
 
+
+    #def controlSvc(self, state):
+    #    if str(state).lower() == 'restart':
+    #        while True:
+    #            if srvname.status() == "RUNNING":
     def checkSVC(self,svcname, quiet=None):
         try:
             srvname = Cservice.WService(svcname)
@@ -285,9 +292,10 @@ challengePassword      = %s
                     print "\n"
                     s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
                 if s == "y" or s == "Y":
-                    p = threading.Thread(name="apache service control", target=srvname.restart)
+                    p = threading.Thread(name="apache service control", target=win32serviceutil.RestartService(self.apachesvc_name))
                     p.daemon = True
                     p.start()
+                    #win32serviceutil.RestartService(self.apachesvc_name)
                     #p.join()
                     #result = queue.get()
                     #print result
@@ -321,9 +329,10 @@ challengePassword      = %s
                     print "\n"
                     s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
                 if s == "y" or s == "Y":
-                    p = threading.Thread(name="apache service control", target=srvname.start)
+                    p = threading.Thread(name="apache service control", target=win32serviceutil.StartService(self.apachesvc_name))
                     p.daemon = True
                     p.start()
+                    #win32serviceutil.StartService(self.apachesvc_name)
                     print "\n"
                     print "\t Service " + str(svcname) + " is " + srvname.status()
                     print "\n"
@@ -632,7 +641,7 @@ challengePassword      = %s
                         if os.path.isdir(i):
                             dir_temp.append(i)
                     if len(dir_temp) > 1:
-                        self.logme("Please make sure where is data web stored !", verbosity, 'critical')
+                        self.logme("Please make sure where is data web stored !", args.verbosity, 'critical')
                         return "\tPlease make sure where is data web stored !"
                     else:
                         PATH = dir_temp[0]
