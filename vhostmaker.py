@@ -16,11 +16,11 @@ import win32serviceutil
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.7"
-__test__ = "0.1"
+__test__ = "0.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'make control service with pywin32, pywin32 dependenci must installed before !'
+__changelog__ = 'Only win32serviceutil'
 __build_date__ = '2014-10-03: 10:31:20'
 
 class maker:
@@ -292,10 +292,10 @@ challengePassword      = %s
                     print "\n"
                     s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
                 if s == "y" or s == "Y":
-                    p = threading.Thread(name="apache service control", target=win32serviceutil.RestartService(self.apachesvc_name))
-                    p.daemon = True
-                    p.start()
-                    #win32serviceutil.RestartService(self.apachesvc_name)
+                    #p = threading.Thread(name="apache service control", target=win32serviceutil.RestartService(self.apachesvc_name))
+                    #p.daemon = True
+                    #p.start()
+                    win32serviceutil.RestartService(self.apachesvc_name)
                     #p.join()
                     #result = queue.get()
                     #print result
@@ -329,10 +329,10 @@ challengePassword      = %s
                     print "\n"
                     s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
                 if s == "y" or s == "Y":
-                    p = threading.Thread(name="apache service control", target=win32serviceutil.StartService(self.apachesvc_name))
-                    p.daemon = True
-                    p.start()
-                    #win32serviceutil.StartService(self.apachesvc_name)
+                    #p = threading.Thread(name="apache service control", target=win32serviceutil.StartService(self.apachesvc_name))
+                    #p.daemon = True
+                    #p.start()
+                    win32serviceutil.StartService(self.apachesvc_name)
                     print "\n"
                     print "\t Service " + str(svcname) + " is " + srvname.status()
                     print "\n"
