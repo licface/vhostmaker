@@ -5,7 +5,7 @@ import optparse
 import string
 import Cservice
 import ConfigParser
-#import subprocess
+import subprocess
 import addhostx as addhost
 import sendgrowl
 import logging
@@ -16,7 +16,7 @@ import win32serviceutil
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.7"
-__test__ = "0.2"
+__test__ = "0.3"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -295,7 +295,8 @@ challengePassword      = %s
                     #p = threading.Thread(name="apache service control", target=win32serviceutil.RestartService(self.apachesvc_name))
                     #p.daemon = True
                     #p.start()
-                    win32serviceutil.RestartService(self.apachesvc_name)
+                    #win32serviceutil.RestartService(self.apachesvc_name)
+                    subprocess.call(['pyservice.pyw', apachesvc_name, 'restart'])
                     #p.join()
                     #result = queue.get()
                     #print result
