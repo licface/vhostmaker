@@ -16,7 +16,7 @@ import win32serviceutil
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.8"
-__test__ = "0.1"
+__test__ = "0.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -497,7 +497,6 @@ challengePassword      = %s
             ServerAlias www.%s
             ErrorLog "logs/%s-https-error.log"
             CustomLog "logs/%s-https-access.log" common
-            DirectoryIndex %s
         </Directory>
     
         SSLProtocol -all +TLSv1 +SSLv3
