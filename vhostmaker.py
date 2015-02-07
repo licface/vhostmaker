@@ -16,11 +16,11 @@ import win32serviceutil
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.8"
-__test__ = "0.2"
+__test__ = "0.3"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'repair SSL Support'
+__changelog__ = 'repair SSL Support 2'
 __build_date__ = '2015-02-07: 17:39:20'
 
 class maker:
@@ -446,15 +446,15 @@ challengePassword      = %s
         SSLProxyEngine off
         SSLOptions +StrictRequire
         SSLVerifyClient none
+        ServerAdmin %s
+        DocumentRoot "%s"
+        ServerName %s
+        ServerAlias www.%s
+        ErrorLog "logs/%s-https-error.log"
+        CustomLog "logs/%s-https-access.log" common
+        DirectoryIndex %s
         <Directory />
             SSLRequireSSL
-            ServerAdmin %s
-            DocumentRoot "%s"
-            ServerName %s
-            ServerAlias www.%s
-            ErrorLog "logs/%s-https-error.log"
-            CustomLog "logs/%s-https-access.log" common
-            DirectoryIndex %s
         </Directory>
     
         SSLProtocol -all +TLSv1 +SSLv3
@@ -489,14 +489,14 @@ challengePassword      = %s
             SSLProxyEngine off
             SSLOptions +StrictRequire
             SSLVerifyClient none
-        <Directory />
-            SSLRequireSSL
             ServerAdmin %s
             DocumentRoot "%s"
             ServerName %s
             ServerAlias www.%s
             ErrorLog "logs/%s-https-error.log"
             CustomLog "logs/%s-https-access.log" common
+        <Directory />
+            SSLRequireSSL
         </Directory>
     
         SSLProtocol -all +TLSv1 +SSLv3
