@@ -15,13 +15,13 @@ import traceback
 import win32serviceutil
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.7"
-__test__ = "0.2"
+__version__ = "1.8"
+__test__ = "0.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'Only win32serviceutil'
-__build_date__ = '2014-10-03: 10:31:20'
+__changelog__ = 'repair SSL Support'
+__build_date__ = '2015-02-07: 17:39:20'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
@@ -448,6 +448,13 @@ challengePassword      = %s
         SSLVerifyClient none
         <Directory />
             SSLRequireSSL
+            ServerAdmin %s
+            DocumentRoot "%s"
+            ServerName %s
+            ServerAlias www.%s
+            ErrorLog "logs/%s-https-error.log"
+            CustomLog "logs/%s-https-access.log" common
+            DirectoryIndex %s
         </Directory>
     
         SSLProtocol -all +TLSv1 +SSLv3
@@ -466,7 +473,7 @@ challengePassword      = %s
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
     </VirtualHost>
-    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
+    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
             else:
                 vhostNote = """<VirtualHost *:80>
         ServerAdmin %s
@@ -484,6 +491,13 @@ challengePassword      = %s
             SSLVerifyClient none
         <Directory />
             SSLRequireSSL
+            ServerAdmin %s
+            DocumentRoot "%s"
+            ServerName %s
+            ServerAlias www.%s
+            ErrorLog "logs/%s-https-error.log"
+            CustomLog "logs/%s-https-access.log" common
+            DirectoryIndex %s
         </Directory>
     
         SSLProtocol -all +TLSv1 +SSLv3
@@ -502,7 +516,7 @@ challengePassword      = %s
             ErrorLog "logs/%s.https-error.log"
             CustomLog "logs/%s.https-access.log" common
     </VirtualHost>
-    """%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
+    """%(self.email,self.path,self.host,self.host,self.host,self.host, self.email,self.path,self.host,self.host,self.host,self.host, self.host,self.host,self.host,self.host,self.host,self.host)
             self.logme('open file vhost mode: write', verbosity, 'info')
             vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
             self.logme('write file vhost', verbosity, 'info')
