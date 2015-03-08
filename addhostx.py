@@ -7,7 +7,7 @@ import os
 import traceback
 import argparse
 #import JHSoftware.SimpleDNSPlus as api
-DLL_PATH = 'c:\Program Files\Simple DNS Plus API for .NET and COM'
+DLL_PATH = 'c:\Program Files (x86)\Simple DNS Plus API for .NET and COM'
 if "IronPython" in sys.version:
     clr.AddReferenceToFileAndPath(os.path.join(DLL_PATH, 'SDNSAPI.dll'))
 else:
@@ -24,12 +24,17 @@ __build__ = "windows"
 
 class simplednshostadd:
 
-    def __init__(self, host, passwd, port=8053, ipA=None, ipNS=None, ipWWW=None, ipMX=None, ipMail=None, ipFtp=None, ipAll=None, email=None):
+    def __init__(self, host=None, passwd=None, port=8053, ipA=None, ipNS=None, ipWWW=None, ipMX=None, ipMail=None, ipFtp=None, ipAll=None, email=None):
         
         self.filename = os.path.split(sys.argv[0])[1]
         #usage = "\t use : " + filename + " example.com 192.168.10.2 root@example.com"
         self.use = "\t use : " + self.filename + " example.com 192.168.10.2 root@example.com ([[host,default=127.0.0.1] [port,default=8053]] [password])"
-        self.conn = Connection(host, port, passwd)
+        # print "MAIN HOST =", host
+        # print "MAIN PORT =", port
+        # print "MAIN PASSWD =", passwd
+        self.conn = ''
+        if host != None and passwd != None:
+            self.conn = Connection(host, int(port), passwd)
         if ipAll == None:
             self.host = host
             self.port = int(port)
@@ -57,6 +62,8 @@ class simplednshostadd:
                 self.email = ''
             else:
                 self.email = email
+        # print "ipAll =", ipAll
+        # print "self.host =", self.host
         
     def sendnotify(self, message, title="SimpleDNSPlus - Control Add Host", msg=""):
         mclass = sendgrow.growl()
@@ -85,12 +92,16 @@ class simplednshostadd:
         if datax == None or datax == "" or len(datax[0]) == 0:
             print usage(True)
         else:
-            if "www." in datax[0]:	
+            if "www." in datax[0]:  
                 print "\t Sorry !, you can't add zone with preffix \"www.\", please remove \"www.\"\n"
                 print usage
             else:
+                # print "datax =", datax
+                # print "datax[0] =", datax[0]
                 #(hostname, ipFtp, ipMail, ipWWW, ipA, ipMX, remote_host, remote_port, remote_password, email)
                 #print "datax 1 =", datax
+                if self.conn == '':
+                    self.conn = Connection(datax[6], int(datax[7]), datax[8])
                 Zone = self.conn.CreateZone(datax[0], str(datax[4]), str(datax[-1]))
                 #print "datax[1] =", datax[1]
                 Zone.Records.Add("ftp."+ datax[0], "A", [str(datax[1])])
@@ -168,16 +179,26 @@ class simplednshostadd:
             else:
                 data_tmp = []
                 data_tmp.append(hostname)
+                # print "host =", hostname
                 data_tmp.append(ipFtp)
+                # print "ipFtp =", ipFtp
                 data_tmp.append(ipMail)
+                # print "ipMail =", ipMail
                 data_tmp.append(ipWWW)
+                # print "ipWWW =", ipWWW
                 data_tmp.append(ipA)
+                # print "ipA =", ipA
                 data_tmp.append(ipMX)
+                # print "ipMX =", ipMX
                 data_tmp.append(remote_host)
+                # print "remote_host =", remote_host
                 data_tmp.append(remote_port)
+                # print "remote_port =", remote_port
                 data_tmp.append(password)
+                # print "password =", password
                 data_tmp.append(add_email)
-                #print 'data_tmp =', data_tmp
+                # print "add_email =", add_email
+                # print 'data_tmp =', data_tmp
                 self.add_Zone(data_tmp)
 
         except:
@@ -282,18 +303,19 @@ class simplednshostadd:
         usage = "HOST [options]"
         parser = argparse.ArgumentParser(usage=usage)
         parser.add_argument('HOST', help='host name to add', action='store')
-        parser.add_argument('-A', '--ipA', help='ip address A default: ' + self.host, action='store')
-        parser.add_argument('-NS', '--ipNS', help='ip address NS default: ' + self.host, action='store')
-        parser.add_argument('-WWW', '--ipWWW', help='ip address WWW default: ' + self.host, action='store')
-        parser.add_argument('-MX', '--ipMX', help='ip address MX default: ' + self.host, action='store')
-        parser.add_argument('-FTP', '--ipFTP', help='ip address FTP default: ' + self.host, action='store')
-        parser.add_argument('-MAIL', '--ipMAIL', help='ip address MAIL defalt: ' + self.host, action='store')
+        parser.add_argument('-A', '--ipA', help='ip address A', action='store')
+        parser.add_argument('-NS', '--ipNS', help='ip address NS', action='store')
+        parser.add_argument('-WWW', '--ipWWW', help='ip address WWW', action='store')
+        parser.add_argument('-MX', '--ipMX', help='ip address MX', action='store')
+        parser.add_argument('-FTP', '--ipFTP', help='ip address FTP', action='store')
+        parser.add_argument('-MAIL', '--ipMAIL', help='ip address MAIL', action='store')
         parser.add_argument('-e', '--email', help='email host server', action='store')
-        parser.add_argument('-H', '--host', help='ip/hostname SimpleDNS Server', action='store')
-        parser.add_argument('-P', '--password', help='password access to SimpleDNS Server', action='store')
-        parser.add_argument('-p', '--port', help='port SimpleDNS Server, default=8053', action='store')
+        parser.add_argument('-H', '--host', help='ip/hostname SimpleDNS Server', default='127.0.0.1', action='store')
+        parser.add_argument('-P', '--password', help='password access to SimpleDNS Server', default='blackid', action='store')
+        parser.add_argument('-p', '--port', help='port SimpleDNS Server, default=8053', default=8053, type=int, action='store')
         parser.add_argument('-d', '--datax', help='list of argv data', action='store')
         parser.add_argument('-v', '--verbosity', help='print running process', action='store_true')
+        parser.add_argument('-a', '--all', help='IP for All', action='store')
         if len(sys.argv) < 2:
             parser.print_help()
         elif printhelp:
@@ -303,15 +325,21 @@ class simplednshostadd:
             try:
                 if args.HOST:
                     #(self, hostname, remote_port=8053, ipA=None, ipNS=None, ipWWW=None, ipMX=None, ipFtp=None, ipMail=None, remote_host=None, password=None, email=None, datax=None)
-                    self.add(args.HOST, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipFTP, args.ipMAIL, args.host, args.password, args.email, args.datax, args.verbosity)
+                    if args.all:
+                        self.add(args.HOST, args.port, args.all, args.all, args.all, args.all, args.all, args.all, args.host, args.password, args.email, args.datax, args.verbosity)
+                    else:
+                        self.add(args.HOST, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipFTP, args.ipMAIL, args.host, args.password, args.email, args.datax, args.verbosity)
             except parser.error:
                 parser.print_help()
                 
-def main(hostname):
-    mc = simplednshostadd('192.168.10.2', 'blackid')
-    #mc.usage()
-    mc.add(hostname)
+def main(hostname=None):
+    mc = simplednshostadd()
+    mc.usage()
+    # if hostname == None:
+    #     mc.usage()
+    # else:
+    #     mc.add(hostname)
         
-#if __name__ == '__main__':
+if __name__ == '__main__':
     
-    #main()
+    main(sys.argv[1])

@@ -8,12 +8,12 @@ import subprocess
 import addhostx as addhost
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.4"
-__test__ = "1.1"
+__version__ = "1.5"
+__test__ = "0.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 'automatic key generator'
+__changelog__ = 'repair all variable & addhostx'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
@@ -27,6 +27,9 @@ class maker:
         self.cfg.read(self.FILECONF)
         self.cfgsave = ConfigParser.SafeConfigParser()
         self.cfgsave.read(self.FILECONF)
+
+    def getCfg(self, section, option):
+        return str(self.cfg.get(section, option)).replace("\\","/")
 
     def get_key(self, bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password='', challengePassword=''):
         key = """
@@ -124,7 +127,7 @@ challengePassword      = %s
                 else:
                     raise SyntaxWarning('Error making key (Mail) ....')                
                 cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
-                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)    
+                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(path) + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)    
                 return True
             elif confr == 'n' or confr == 'N':
                 pass
@@ -144,7 +147,7 @@ challengePassword      = %s
             else:
                 raise SyntaxWarning('Error making key (Mail) ....')                
             cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
-            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)          
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(path) + self.host + ".key -out " + str(path) + self.host + ".crt -config " + cfgkey)          
             #os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
 
@@ -296,8 +299,8 @@ challengePassword      = %s
 
     SSLProtocol -all +TLSv1 +SSLv3
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-    SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
-    SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
+    SSLCertificateFile "%s/%s.crt"
+    SSLCertificateKeyFile  "%s/%s.key"
     #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
     SSLSessionCacheTimeout 600   
     <IfModule mime.c>
@@ -310,7 +313,7 @@ challengePassword      = %s
     ErrorLog "logs/%s.https-error.log"
     CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
-"""%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.host,self.host,self.host,self.host,self.host,self.host)
+"""%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, self.getCfg('PATH', 'sslpath'), self.host, self.getCfg('PATH', 'sslpath'), self.host,self.host,self.host,self.host,self.host)
         else:
             vhostNote = """<VirtualHost *:80>
     ServerAdmin %s
@@ -332,8 +335,8 @@ challengePassword      = %s
 
     SSLProtocol -all +TLSv1 +SSLv3
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-        SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
-        SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
+        SSLCertificateFile "%s/%s.crt"
+        SSLCertificateKeyFile  "%s/%s.key"
         #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
         SSLSessionCacheTimeout 600   
         <IfModule mime.c>
@@ -346,7 +349,7 @@ challengePassword      = %s
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
-"""%(self.email,self.path,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host,self.host)
+"""%(self.email,self.path,self.host,self.host,self.host,self.host, self.getCfg('PATH', 'sslpath'), self.host, self.getCfg('PATH', 'sslpath'),self.host,self.host,self.host,self.host,self.host)
         vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
         vhostFile.write(vhostNote)
         vhostFile.close()
@@ -379,17 +382,17 @@ challengePassword      = %s
             port = port        
 
         proxyNote = """<VirtualHost *:80>
-	<Proxy *:%s>
-		Require all granted
-	</Proxy>
+    <Proxy *:%s>
+        Require all granted
+    </Proxy>
     ServerAdmin %s
-	ProxyPreserveHost On
-	ProxyPass / http://%s:%s/
-	ProxyPassReverse / http://%s:%s/
-	ServerName %s
-	ServerAlias www.%s
-	ErrorLog "logs/%s-error.log"
-	CustomLog "logs/%s-access.log" common
+    ProxyPreserveHost On
+    ProxyPass / http://%s:%s/
+    ProxyPassReverse / http://%s:%s/
+    ServerName %s
+    ServerAlias www.%s
+    ErrorLog "logs/%s-error.log"
+    CustomLog "logs/%s-access.log" common
 </VirtualHost>
 
 <VirtualHost *:443>
@@ -406,8 +409,8 @@ challengePassword      = %s
 
     SSLProtocol -all +TLSv1 +SSLv3
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-        SSLCertificateFile "d:/WWW/SSLCertificateKeyFile/%s.crt"
-        SSLCertificateKeyFile  "d:/WWW/SSLCertificateKeyFile/%s.key"
+        SSLCertificateFile "%s/%s.crt"
+        SSLCertificateKeyFile  "%s/%s.key"
         #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
         SSLSessionCacheTimeout 600   
         <IfModule mime.c>
@@ -423,7 +426,7 @@ challengePassword      = %s
         ErrorLog "logs/%s.https-error.log"
         CustomLog "logs/%s.https-access.log" common
 </VirtualHost>
-"""%(port,self.email,ip,port, ip,port,self.host,self.host,self.host, self.host,port,self.host,self.host,ip,port,ip,port,self.host,self.host,self.host,self.host)
+"""%(port,self.email,ip,port, ip,port,self.host,self.host,self.host, self.host,port, self.getCfg('PATH', 'sslpath'), self.host, self.getCfg('PATH', 'sslpath'), self.host,ip,port,ip,port,self.host,self.host,self.host,self.host)
         self.masterpath = self.qMPath()
         proxyFile = open(os.path.join(self.masterpath, str(host) + ".conf"),"w")
         proxyFile.write(proxyNote)
