@@ -1,16 +1,16 @@
-import ConfigParser
+#import ConfigParser
 
-config = ConfigParser.RawConfigParser()
-cfg = ConfigParser.SafeConfigParser()
-cfg.read('example.cfg')
-cfg.set('Section1','baz','ETETR')
-with open('example.cfg', 'wb') as configfile:
-    cfg.write(configfile)
+#config = ConfigParser.RawConfigParser()
+#cfg = ConfigParser.SafeConfigParser()
+#cfg.read('example.cfg')
+#cfg.set('Section1','baz','ETETR')
+#with open('example.cfg', 'wb') as configfile:
+    #cfg.write(configfile)
     
     
-config = ConfigParser.RawConfigParser()
-config.read('example.cfg')
-print config.get('Section1','baz')
+#config = ConfigParser.RawConfigParser()
+#config.read('example.cfg')
+#print config.get('Section1','baz')
 
 #print dir(cfg)
 
@@ -33,3 +33,14 @@ print config.get('Section1','baz')
 #with open('example.cfg', 'wb') as configfile:
 #    config.write(configfile)
 
+import test
+
+class testyou(test.testme):
+	def __init__(self):
+		super(testyou)
+	
+	def test002(self):
+		self.test001()
+
+c = testyou()
+c.test002()
