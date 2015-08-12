@@ -13,21 +13,20 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.2"
+__test__ = "0.3"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
 __changelog__ = 're-add log function + func: search host'
-__build_date__ = '2015-05-23: 20:39:20'
+__build_date__ = '2015-07-12: 21:18:10 (+8)'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
-        self.apachesvc_name = 'apache249'
         self.host = host
         self.path = path
         self.email = email     
         self.masterpath = None
-        self.FILECONF = os.path.join(os.path.dirname(__file__),"conf.ini")
+        self.FILECONF = os.path.join(os.path.dirname(__file__),"vhostmaker.ini")
         self.cfg = ConfigParser.RawConfigParser()
         self.cfg.read(self.FILECONF)
         self.cfgsave = ConfigParser.SafeConfigParser()
@@ -37,6 +36,7 @@ class maker:
         self.logg = logging.StreamHandler()
         self.logg.setFormatter(self.format_logging)
         self.logger.addHandler(self.logg)
+        self.apachesvc_name = self.getCfg('SERVER', 'serversvc')
         
     def getCfg(self, section, option):
         return str(self.cfg.get(section, option)).replace("\\","/")    
@@ -427,40 +427,41 @@ challengePassword      = %s
                 dindex = "# DirectoryIndex index.html"
                 
             vhostNote = """<VirtualHost *:80>
-        ServerAdmin %s
-        DocumentRoot "%s"
-        ServerName %s
-        ServerAlias www.%s
-        ErrorLog "logs/%s-error.log"
-        CustomLog "logs/%s-access.log" common
-        %s
-    </VirtualHost>
+ServerAdmin %s
+DocumentRoot "%s"
+ServerName %s
+ServerAlias www.%s
+ErrorLog "logs/%s-error.log"
+CustomLog "logs/%s-access.log" common
+%s
+Options Indexes FollowSymLinks
+</VirtualHost>
 
-    <VirtualHost *:443>
-            SSLEngine on
-            SSLProxyEngine off
-            SSLOptions +StrictRequire
-            SSLVerifyClient none
-        <Directory />
-            SSLRequireSSL
-        </Directory>
+<VirtualHost *:443>
+    SSLEngine on
+    SSLProxyEngine off
+    SSLOptions +StrictRequire
+    SSLVerifyClient none
+<Directory />
+    SSLRequireSSL
+</Directory>
 
-        SSLProtocol -all +TLSv1 +SSLv3
-        SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-            SSLCertificateFile "%s/%s.crt"
-            SSLCertificateKeyFile  "%s/%s.key"
-            #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
-            SSLSessionCacheTimeout 600   
-            <IfModule mime.c>
-            AddType application/x-x509-ca-cert      .crt
-            AddType application/x-pkcs7-crl         .crl
-        </IfModule>
-            SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
-            ServerName %s
-            ServerAlias www.%s
-            ErrorLog "logs/%s.https-error.log"
-            CustomLog "logs/%s.https-access.log" common
-    </VirtualHost>
+SSLProtocol -all +TLSv1 +SSLv3
+SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
+    SSLCertificateFile "%s/%s.crt"
+    SSLCertificateKeyFile  "%s/%s.key"
+    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+    SSLSessionCacheTimeout 600   
+    <IfModule mime.c>
+    AddType application/x-x509-ca-cert      .crt
+    AddType application/x-pkcs7-crl         .crl
+</IfModule>
+    SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+    ServerName %s
+    ServerAlias www.%s
+    ErrorLog "logs/%s.https-error.log"
+    CustomLog "logs/%s.https-access.log" common
+</VirtualHost>
     """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, SLL_PATH, self.host, SLL_PATH,self.host,self.host,self.host,self.host,self.host)
             self.logme('open file vhost mode: write', verbosity, 'info')
             vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
@@ -480,7 +481,7 @@ challengePassword      = %s
         except:
             self.logme('', verbosity, 'error', True)
 
-    def proxy(self, host, port, email="root@", ip=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None):
+    def proxy(self, host, port, email="root@", ip=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None, quiet=None):
         try:
             if self.host == None:
                 self.host = host
@@ -502,50 +503,50 @@ challengePassword      = %s
                 port = port        
         
             proxyNote = """<VirtualHost *:80>
-            <Proxy *:%s>
-                Require all granted
-            </Proxy>
-            ServerAdmin %s
-            ProxyPreserveHost On
-            ProxyPass / http://%s:%s/
-            ProxyPassReverse / http://%s:%s/
-            ServerName %s
-            ServerAlias www.%s
-            ErrorLog "logs/%s-error.log"
-            CustomLog "logs/%s-access.log" common
-        </VirtualHost>
-        
-        <VirtualHost *:443>
-                <Proxy *:%s>
-                    Require all granted
-                </Proxy>
-                SSLEngine on
-                SSLProxyEngine off
-                SSLOptions +StrictRequire
-                SSLVerifyClient none
-            <Directory />
-                SSLRequireSSL
-            </Directory>
-        
-            SSLProtocol -all +TLSv1 +SSLv3
-            SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
-                SSLCertificateFile "%s/%s.crt"
-                SSLCertificateKeyFile  "%s/%s.key"
-                #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
-                SSLSessionCacheTimeout 600   
-                <IfModule mime.c>
-                AddType application/x-x509-ca-cert      .crt
-                AddType application/x-pkcs7-crl         .crl
-            </IfModule>
-                SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
-                ProxyPreserveHost On
-                ProxyPass / http://%s:%s/
-                ProxyPassReverse / http://%s:%s/
-                ServerName %s
-                ServerAlias www.%s
-                ErrorLog "logs/%s.https-error.log"
-                CustomLog "logs/%s.https-access.log" common
-        </VirtualHost>
+    <Proxy *:%s>
+        Require all granted
+    </Proxy>
+    ServerAdmin %s
+    ProxyPreserveHost On
+    ProxyPass / http://%s:%s/
+    ProxyPassReverse / http://%s:%s/
+    ServerName %s
+    ServerAlias www.%s
+    ErrorLog "logs/%s-error.log"
+    CustomLog "logs/%s-access.log" common
+</VirtualHost>
+
+<VirtualHost *:443>
+        <Proxy *:%s>
+            Require all granted
+        </Proxy>
+        SSLEngine on
+        SSLProxyEngine off
+        SSLOptions +StrictRequire
+        SSLVerifyClient none
+    <Directory />
+        SSLRequireSSL
+    </Directory>
+
+    SSLProtocol -all +TLSv1 +SSLv3
+    SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
+        SSLCertificateFile "%s/%s.crt"
+        SSLCertificateKeyFile  "%s/%s.key"
+        #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+        SSLSessionCacheTimeout 600   
+        <IfModule mime.c>
+        AddType application/x-x509-ca-cert      .crt
+        AddType application/x-pkcs7-crl         .crl
+    </IfModule>
+        SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+        ProxyPreserveHost On
+        ProxyPass / http://%s:%s/
+        ProxyPassReverse / http://%s:%s/
+        ServerName %s
+        ServerAlias www.%s
+        ErrorLog "logs/%s.https-error.log"
+        CustomLog "logs/%s.https-access.log" common
+</VirtualHost>
         """%(port,self.email,ip,port, ip,port,self.host,self.host,self.host, self.host,port, self.getCfg('PATH', 'sslpath'), self.host, self.getCfg('PATH', 'sslpath'), self.host,ip,port,ip,port,self.host,self.host,self.host,self.host)
             self.logme('verify masterpath', verbosity, 'info')
             self.masterpath = self.qMPath()
