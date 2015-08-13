@@ -16,7 +16,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.2"
+__test__ = "0.3"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -163,7 +163,7 @@ challengePassword      = %s
 
     def keymaker(self, quiet=None):
         path = self.cfg.get('PATH','SSLPATH')
-        print "CRT  =", os.path.isfile(os.path.join(str(path),self.host + ".crt"))
+        print "CRT  =", os.path.join(str(path),self.host + ".crt")
         print "KEY  =", path + self.host + ".key"
         if os.path.isfile(os.path.join(str(path),self.host + ".crt")):
             print "\n"
@@ -184,7 +184,7 @@ challengePassword      = %s
                 else:
                     raise SyntaxWarning('Error making key (Mail) ....')                
                 cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
-                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(path) + self.host + ".key -out %s\\" %(path) + self.host + ".crt -config " + cfgkey)    
+                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(str(path), self.host)) + ".key -out %s\\" %(os.path.join(str(path), self.host)) + ".crt -config " + cfgkey)    
                 return True
             elif confr == 'n' or confr == 'N':
                 pass
@@ -205,7 +205,7 @@ challengePassword      = %s
                 raise SyntaxWarning('Error making key (Mail) ....')                
             cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
             # print "PATH SLL B =", path
-            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(path) + self.host + ".key -out %s\\" %(path) + self.host + ".crt -config " + cfgkey)          
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(path, self.host)) + ".key -out %s\\" %(path) + self.host + ".crt -config " + cfgkey)          
             #os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
 
