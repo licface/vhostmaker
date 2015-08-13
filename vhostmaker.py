@@ -16,7 +16,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.4"
+__test__ = "0.5"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -205,7 +205,7 @@ challengePassword      = %s
                 raise SyntaxWarning('Error making key (Mail) ....')                
             cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
             # print "PATH SLL B =", path
-            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(path, self.host)) + ".key -out %s\\" %(path) + self.host + ".crt -config " + cfgkey)          
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(path, self.host)) + ".key -out %s\\" %(os.path.join(path, self.host)) + ".crt -config " + cfgkey)          
             #os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
 
