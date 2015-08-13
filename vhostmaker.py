@@ -14,7 +14,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.6"
+__test__ = "0.7"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -478,8 +478,9 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             self.logme('make SSL Key', verbosity, 'info')
             self.keymaker(quiet=quiet)
             self.logme('Verify file vhost apache config', verbosity, 'info')
-            if self.includeVhost(verbosity=verbosity) == True:
-                self.includeVhost(verbosity=verbosity)
+            if sys.platform == 'win32'
+                if self.includeVhost(verbosity=verbosity) == True:
+                    self.includeVhost(verbosity=verbosity)
             self.qAPath(quiet=quiet)
         except:
             self.logme('', verbosity, 'error', True)
@@ -564,7 +565,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     addhost.main(ipAll, self.host, passwd_sdns)
             self.keymaker(quiet=quiet)
             #if self.includeVhost(verbosity=verbosity) == True:
-            self.includeVhost(verbosity=verbosity)
+            if sys.platform == 'win32'
+                self.includeVhost(verbosity=verbosity)
             self.qAPath(quiet=quiet)
         except Exception, exc:
             print "\n"
