@@ -16,7 +16,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.5"
+__test__ = "0.6"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -437,8 +437,8 @@ ServerAdmin %s
 DocumentRoot "%s"
 ServerName %s
 ServerAlias www.%s
-ErrorLog "logs/%s-error.log"
-CustomLog "logs/%s-access.log" common
+ErrorLog "${APACHE_LOG_DIR}/vhost/%s-error.log"
+CustomLog "${APACHE_LOG_DIR}/vhost/%s-access.log" common
 %s
 Options Indexes FollowSymLinks
 </VirtualHost>
@@ -456,7 +456,7 @@ SSLProtocol -all +TLSv1 +SSLv3
 SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SSLCertificateFile "%s/%s.crt"
     SSLCertificateKeyFile  "%s/%s.key"
-    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/${APACHE_LOG_DIR}/ssl_scache(512000)"
     SSLSessionCacheTimeout 600   
     <IfModule mime.c>
     AddType application/x-x509-ca-cert      .crt
@@ -465,8 +465,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
     ServerName %s
     ServerAlias www.%s
-    ErrorLog "logs/%s.https-error.log"
-    CustomLog "logs/%s.https-access.log" common
+    ErrorLog "${APACHE_LOG_DIR}/vhost/%s.https-error.log"
+    CustomLog "${APACHE_LOG_DIR}/vhost/%s.https-access.log" common
 </VirtualHost>
     """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, SLL_PATH, self.host, SLL_PATH,self.host,self.host,self.host,self.host,self.host)
             self.logme('open file vhost mode: write', verbosity, 'info')
@@ -520,8 +520,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     ProxyPassReverse / http://%s:%s/
     ServerName %s
     ServerAlias www.%s
-    ErrorLog "logs/%s-error.log"
-    CustomLog "logs/%s-access.log" common
+    ErrorLog "${APACHE_LOG_DIR}/vhost/%s-error.log"
+    CustomLog "${APACHE_LOG_DIR}/vhost/%s-access.log" common
 </VirtualHost>
 
 <VirtualHost *:443>
@@ -540,7 +540,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         SSLCertificateFile "%s/%s.crt"
         SSLCertificateKeyFile  "%s/%s.key"
-        #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/logs/ssl_scache(512000)"
+        #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/${APACHE_LOG_DIR}/ssl_scache(512000)"
         SSLSessionCacheTimeout 600   
         <IfModule mime.c>
         AddType application/x-x509-ca-cert      .crt
@@ -552,8 +552,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         ProxyPassReverse / http://%s:%s/
         ServerName %s
         ServerAlias www.%s
-        ErrorLog "logs/%s.https-error.log"
-        CustomLog "logs/%s.https-access.log" common
+        ErrorLog "${APACHE_LOG_DIR}/vhost/%s.https-error.log"
+        CustomLog "${APACHE_LOG_DIR}/vhost/%s.https-access.log" common
 </VirtualHost>
         """%(port,self.email,ip,port, ip,port,self.host,self.host,self.host, self.host,port, self.getCfg('PATH', 'sslpath'), self.host, self.getCfg('PATH', 'sslpath'), self.host,ip,port,ip,port,self.host,self.host,self.host,self.host)
             self.logme('verify masterpath', verbosity, 'info')
