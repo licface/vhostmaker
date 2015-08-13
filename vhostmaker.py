@@ -5,16 +5,16 @@ import argparse
 import string
 if sys.platform == 'win32':
     import Cservice
+    import addhostx as addhost
 import ConfigParser
 import subprocess
-import addhostx as addhost
 import logging
 import inspect
 import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.5"
+__test__ = "0.6"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -473,7 +473,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             vhostFile.close()
             if adddns:
                 self.logme('add host', verbosity, 'info')
-                addhost.main(ipAll, self.host, passwd_sdns)            
+                if sys.platform == 'win32':
+                    addhost.main(ipAll, self.host, passwd_sdns)            
             self.logme('make SSL Key', verbosity, 'info')
             self.keymaker(quiet=quiet)
             self.logme('Verify file vhost apache config', verbosity, 'info')
@@ -559,7 +560,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             self.logme('close config temp', verbosity, 'info')
             proxyFile.close()    
             if adddns:
-                addhost.main(ipAll, self.host, passwd_sdns)
+                if sys.platform == 'win32':
+                    addhost.main(ipAll, self.host, passwd_sdns)
             self.keymaker(quiet=quiet)
             #if self.includeVhost(verbosity=verbosity) == True:
             self.includeVhost(verbosity=verbosity)
@@ -706,12 +708,13 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                 else:
                     if args.delete:
                         self.del_host(args.HOST, args.verbosity)
-                        try:
-                            c_addhost = addhost.simplednshostadd()
-                            c_addhost.del_zone(args.HOST, '127.0.0.1', 8053, 'blackid')
-                        except:
-                            if args.verbosity:
-                                print traceback.format_exc()
+                        if sys.platform == 'win32':
+                            try:
+                                c_addhost = addhost.simplednshostadd()
+                                c_addhost.del_zone(args.HOST, '127.0.0.1', 8053, 'blackid')
+                            except:
+                                if args.verbosity:
+                                    print traceback.format_exc()
                     elif args.search:
                         self.host_search(args.HOST)                    
                     else:
@@ -766,29 +769,30 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     
             elif args.TYPE == 'dns':
                 # print "args =", args
-                c_addhost = addhost.simplednshostadd()
-                c_addhost.__init__(args.host, args.password, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipMAIL, args.ipFTP, args.all, args.email, args.HOST, args.verbosity)
-                if str(args.HOST).lower() == "update":
-                    c_addhost.updateZone(args.ipaddress)
-                if args.search:
-                    self.host_search(args.HOST)                
-                if args.remove:
-                    c_addhost.del_zone(args.HOST)
-                if args.all:
+                if sys.platform == 'win32':
+                    c_addhost = addhost.simplednshostadd()
+                    c_addhost.__init__(args.host, args.password, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipMAIL, args.ipFTP, args.all, args.email, args.HOST, args.verbosity)
                     if str(args.HOST).lower() == "update":
-                        c_addhost.updateZone(args.all)
-                    else:
-                        c_addhost.add(args.HOST, args.port, args.all, args.all, args.all, args.all, args.all, args.all, args.host, args.password, args.email, args.datax, args.verbosity)
-                else:
-                    if str(args.HOST).lower() == "update":
-                        pass
-                    elif args.remove:
-                        pass
-                    else:
-                        if args.ipA == None:
-                            args_dns = args_dns.parse_args(['dns', '-h'])
+                        c_addhost.updateZone(args.ipaddress)
+                    if args.search:
+                        self.host_search(args.HOST)                
+                    if args.remove:
+                        c_addhost.del_zone(args.HOST)
+                    if args.all:
+                        if str(args.HOST).lower() == "update":
+                            c_addhost.updateZone(args.all)
                         else:
-                            c_addhost.add(args.host, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipFTP, args.ipMAIL, args.host, args.password, args.email, args.datax, args.verbosity)
+                            c_addhost.add(args.HOST, args.port, args.all, args.all, args.all, args.all, args.all, args.all, args.host, args.password, args.email, args.datax, args.verbosity)
+                    else:
+                        if str(args.HOST).lower() == "update":
+                            pass
+                        elif args.remove:
+                            pass
+                        else:
+                            if args.ipA == None:
+                                args_dns = args_dns.parse_args(['dns', '-h'])
+                            else:
+                                c_addhost.add(args.host, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipFTP, args.ipMAIL, args.host, args.password, args.email, args.datax, args.verbosity)
             elif args.search:
                 self.host_search(args.HOST)            
             else:
