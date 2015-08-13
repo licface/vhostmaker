@@ -3,7 +3,8 @@ import sys
 import re
 import argparse
 import string
-import Cservice
+if sys.platform == 'win32':
+    import Cservice
 import ConfigParser
 import subprocess
 import addhostx as addhost
@@ -13,7 +14,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.4"
+__test__ = "0.5"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -278,72 +279,73 @@ challengePassword      = %s
             return path    
         
     def checkSVC(self,svcname, quiet=None):
-        try:
-            srvname = Cservice.WService(svcname)
-            if srvname.status() == "RUNNING":
-                if quiet:
-                    s = "y"
-                    print " Service " + str(svcname) + " is RUNNING and will be RESTART it !: "
+        if sys.platform == 'win32':
+            try:
+                srvname = Cservice.WService(svcname)
+                if srvname.status() == "RUNNING":
+                    if quiet:
+                        s = "y"
+                        print " Service " + str(svcname) + " is RUNNING and will be RESTART it !: "
+                    else:
+                        print "\n"
+                        s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
+                    if s == "y" or s == "Y":
+                        srvname.restart()
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        return True
+                    elif s == "n" or s == "N":
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
+                        return True
+                    else:
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print " You Not select y/n (SKIPPED)!"
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        return False
+                elif srvname.status() == "STARTING":
+                    print "\t Service " + str(svcname) + " is " + srvname.status()
+                    print "\t Plase Wait a while ... "
                 else:
-                    print "\n"
-                    s = raw_input(" Service " + str(svcname) + " is RUNNING, Do you want to RESTART it (y/n): ")
-                if s == "y" or s == "Y":
-                    srvname.restart()
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
-                    return True
-                elif s == "n" or s == "N":
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"
-                    return True
-                else:
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print " You Not select y/n (SKIPPED)!"
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
-                    return False
-            elif srvname.status() == "STARTING":
-                print "\t Service " + str(svcname) + " is " + srvname.status()
-                print "\t Plase Wait a while ... "
-            else:
-                if quiet:
-                    s = "y"
-                    print " Service " + str(svcname) + " is %s and will be START it !: " % (str(srvname.status()))
-                else:
-                    print "\n"
-                    s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
-                if s == "y" or s == "Y":
-                    srvname.start()
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
-                    return True
-                elif s == "n" or s == "N":
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"
-                    return True
-                else:
-                    print "\n"
-                    print "\t Service " + str(svcname) + " is " + srvname.status()
-                    print "\n"
-                    print " You Not select y/n (SKIPPED)!"
-                    print "\n"
-                    print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
-                    return False
-            return True            
-        except SyntaxError:
-            APath = raw_input(" Please Definition Web Server Service Name\n (example: apache2.4|httpd|xginx): ")
-            self.writeconf('SERVER','SERVERSVC',APath)
-            self.checkSVC(APath, quiet)    
+                    if quiet:
+                        s = "y"
+                        print " Service " + str(svcname) + " is %s and will be START it !: " % (str(srvname.status()))
+                    else:
+                        print "\n"
+                        s = raw_input(" Service " + str(svcname) + " is STOPPED, Do you want to START it (y/n): ")
+                    if s == "y" or s == "Y":
+                        srvname.start()
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        return True
+                    elif s == "n" or s == "N":
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
+                        return True
+                    else:
+                        print "\n"
+                        print "\t Service " + str(svcname) + " is " + srvname.status()
+                        print "\n"
+                        print " You Not select y/n (SKIPPED)!"
+                        print "\n"
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        return False
+                return True            
+            except SyntaxError:
+                APath = raw_input(" Please Definition Web Server Service Name\n (example: apache2.4|httpd|xginx): ")
+                self.writeconf('SERVER','SERVERSVC',APath)
+                self.checkSVC(APath, quiet)    
         return False
 
     def qAPath(self,sname=None, quiet=None):
