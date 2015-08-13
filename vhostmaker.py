@@ -13,7 +13,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.3"
+__test__ = "0.4"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -611,7 +611,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         parser.add_argument("HOST", help="Add host (example: myhost.com) or type 'update' for Update IP on SDSN Server (-U)", action="store", type=str)
         parser.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='root@')
         parser.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
-        parser.add_argument('-n', '--nodns', help="Not generate DNS Host", action="store_true")
+        parser.add_argument('-n', '--adddns', help="Not generate DNS Host", action="store_true")
         parser.add_argument("-v","--verbosity", help="Show process running", action="store_true")
         parser.add_argument('-P', '--password', help='password access to SimpleDNS Server', default='blackid', action='store')
         parser.add_argument('-ipDNS', "--ipSDNS", help="IP SimpleDNS Server ", default='127.0.0.1', action="store", type=str)
@@ -630,7 +630,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_vhost.add_argument("-t", '--path', help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str, dest="PATH")
         args_vhost.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
         args_vhost.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
-        args_vhost.add_argument('-n', '--nodns', help="Not generate DNS Host", action="store_true")
+        args_vhost.add_argument('-n', '--adddns', help="add generate DNS Host", action="store_true")
         args_vhost.add_argument("-v", "--verbosity", help="Show process running", action="store_true")
         args_vhost.add_argument('-ipDNS', "--ipSDNS", help="IP SimpleDNS Server ", default='127.0.0.1', action="store", type=str)
         args_vhost.add_argument('-P', '--password', help='password access to SimpleDNS Server', default='blackid', action='store')
@@ -642,7 +642,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_proxy.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
         args_proxy.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used default: 80 ",action="store", type=int, default=80)
         args_proxy.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
-        args_proxy.add_argument('-n', '--nodns', help="Not generate DNS Host", action="store_true")
+        args_proxy.add_argument('-n', '--adddns', help="add generate DNS Host", action="store_true")
         args_proxy.add_argument("-v", "--verbosity", help="Show process running", action="store_true")
         args_proxy.add_argument('-ipDNS', "--ipSDNS", help="IP SimpleDNS Server default: 127.0.0.1", default='127.0.0.1', action="store", type=str)
         args_proxy.add_argument('-P', '--password', help='password access to SimpleDNS Server', default='blackid', action='store')
@@ -688,10 +688,10 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     
             if args.TYPE == "vhost": #Virtual Host (VHOST)
                 if args.ip:
-                    args.nodns = True
+                    args.adddns = True
                 if args.PATH:
                     if os.path.isdir(args.PATH):
-                        self.vhost(args.HOST, args.PATH, args.email, dindex=args.directoryindex, adddns=args.nodns, verbosity=args.verbosity, ipAll=args.ip, passwd_sdns=args.password)
+                        self.vhost(args.HOST, args.PATH, args.email, dindex=args.directoryindex, adddns=args.adddns, verbosity=args.verbosity, ipAll=args.ip, passwd_sdns=args.password)
                     elif args.search:
                         self.host_search(args.HOST)
                     else:
@@ -725,20 +725,20 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     if args.search:
                         self.host_search(args.HOST)                    
                     if args.ip:
-                        args.nodns = True
+                        args.adddns = True
     
                         if args.port:
                             if isinstance(args.port, int):
                                 if args.email:
                                     if "@" in args.email:
-                                        self.proxy(args.HOST, str(args.port), args.email, args.ip, args.nodns, args.verbosity, args.ip, args.password)
+                                        self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password)
                                     else:
                                         print "\n"
                                         print "\t Please Insert Correct EMAIL !"
                                         print "\n"
                                         parser.print_help()
                                 else:
-                                    self.proxy(args.HOST, str(args.port), args.email, args.ip, args.nodns, args.verbosity, args.ip, args.password)
+                                    self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password)
                             else:
                                 print "\n"
                                 print "\tPlease insert PORT Number !"
