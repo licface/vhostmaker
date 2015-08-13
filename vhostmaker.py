@@ -15,8 +15,8 @@ import inspect
 import traceback
 
 __author__ = "licface@yahoo.com"
-__version__ = "1.9"
-__test__ = "0.9"
+__version__ = "2.0"
+__test__ = "0.1"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -104,7 +104,7 @@ challengePassword      = %s
             return path
         """
         data = self.get_key(bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password, challengePassword)
-        path = os.path.join(os.getenv('TEMP'), CN + "_temp.key")
+        path = os.path.join(os.getenv('TEMP'), CN + "_temp.key")
         f = open(path, "w")
         f.write(data)
         f.close()
