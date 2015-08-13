@@ -6,6 +6,8 @@ import string
 if sys.platform == 'win32':
     import Cservice
     import addhostx as addhost
+elif 'linux' in sys.platform:
+    os.environ.update({'TEMP':'/tmp'})
 import ConfigParser
 import subprocess
 import logging
@@ -14,11 +16,11 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "1.9"
-__test__ = "0.8"
+__test__ = "0.9"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
-__changelog__ = 're-add log function + func: search host'
+__changelog__ = ''
 __build_date__ = '2015-07-12: 21:18:10 (+8)'
 
 class maker:
@@ -102,7 +104,7 @@ challengePassword      = %s
             return path
         """
         data = self.get_key(bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password, challengePassword)
-        path = os.path.join(os.getenv('TEMP'), CN + "_temp.key")
+        path = os.path.join(os.getenv('TEMP'), CN + "_temp.key")
         f = open(path, "w")
         f.write(data)
         f.close()
