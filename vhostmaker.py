@@ -16,7 +16,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.1"
+__test__ = "0.2"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -163,6 +163,8 @@ challengePassword      = %s
 
     def keymaker(self, quiet=None):
         path = self.cfg.get('PATH','SSLPATH')
+        print "CRT  =", os.path.isfile(os.path.join(str(path),self.host + ".crt"))
+        print "KEY  =", path + self.host + ".key"
         if os.path.isfile(os.path.join(str(path),self.host + ".crt")):
             print "\n"
             if quiet:
