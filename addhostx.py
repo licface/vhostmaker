@@ -34,7 +34,7 @@ else:
     sys.path.append(DLL_PATH)
     clr.AddReference("SDNSAPI")
 from JHSoftware.SimpleDNSPlus import *
-import sendgrowl
+import sendgrowl as sendgrow
 
 __version__ = "3.2"
 __test__ = "1.0"
