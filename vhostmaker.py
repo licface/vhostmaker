@@ -1,33 +1,30 @@
 import os
 import sys
-import re
 import argparse
-import string
 if sys.platform == 'win32':
     import Cservice
     import addhostx as addhost
 elif 'linux' in sys.platform:
     os.environ.update({'TEMP':'/tmp'})
 import ConfigParser
-import subprocess
 import logging
 import inspect
 import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.6"
+__test__ = "0.8"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
 __changelog__ = ''
-__build_date__ = '2015-07-12: 21:18:10 (+8)'
+__build_date__ = '2015-08-26: 06:18:10 (+8)'
 
 class maker:
     def __init__(self, host=None,path=None,email=None):
         self.host = host
         self.path = path
-        self.email = email     
+        self.email = email
         self.masterpath = None
         self.FILECONF = os.path.join(os.path.dirname(__file__),"vhostmaker.ini")
         self.cfg = ConfigParser.RawConfigParser()
@@ -40,34 +37,34 @@ class maker:
         self.logg.setFormatter(self.format_logging)
         self.logger.addHandler(self.logg)
         self.apachesvc_name = self.getCfg('SERVER', 'serversvc')
-        
+
     def getCfg(self, section, option):
-        return str(self.cfg.get(section, option)).replace("\\","/")    
+        return str(self.cfg.get(section, option)).replace("\\","/")
 
     def get_key(self, bits, pem, C, ST, L, O, OU, CN, emailaddr, output_password='', challengePassword=''):
         """
             get inserted key for SSL key config return variabel key string
 
         [req]
-            default_bits           = 
+            default_bits           =
             default_keyfile        = .pem
-            distinguished_name     = 
-            attributes             = 
-            prompt                 = 
-            output_password        = 
+            distinguished_name     =
+            attributes             =
+            prompt                 =
+            output_password        =
 
         [req_distinguished_name]
-            C                      = 
-            ST                     = 
-            L                      = 
-            O                      = 
-            OU                     = 
-            CN                     = 
-            emailAddress           = 
+            C                      =
+            ST                     =
+            L                      =
+            O                      =
+            OU                     =
+            CN                     =
+            emailAddress           =
 
         [req_attributes]
-            challengePassword      = 
-        """        
+            challengePassword      =
+        """
         key = """
 [req]
 default_bits           = %d
@@ -141,10 +138,10 @@ challengePassword      = %s
                 d2 = str(host).split('.') #['xxx', 'com']
                 if len(d2[-1]) == 2 or len(d2[-1]) == 3:
                     for i in range(0, len(d2) - 1):
-                        d3 = d3 + d2[i]                        
+                        d3 = d3 + d2[i]
                 else:
                     for i in range(0, len(d2)):
-                        d3 = d3 + d2[i]#print "d3 =", d3                        
+                        d3 = d3 + d2[i]#print "d3 =", d3
             else:
                 return host
         return d3
@@ -159,7 +156,7 @@ challengePassword      = %s
                 return False
         else:
             d3 = str(mailaccount) + '@' + host
-        return d3    
+        return d3
 
     def keymaker(self, quiet=None):
         path = self.cfg.get('PATH','SSLPATH')
@@ -182,9 +179,9 @@ challengePassword      = %s
                 if DMail != False:
                     Mail = self.get_email(self.host, 'root')
                 else:
-                    raise SyntaxWarning('Error making key (Mail) ....')                
+                    raise SyntaxWarning('Error making key (Mail) ....')
                 cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
-                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(str(path), self.host)) + ".key -out %s\\" %(os.path.join(str(path), self.host)) + ".crt -config " + cfgkey)    
+                os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(str(path), self.host)) + ".key -out %s\\" %(os.path.join(str(path), self.host)) + ".crt -config " + cfgkey)
                 return True
             elif confr == 'n' or confr == 'N':
                 pass
@@ -202,10 +199,10 @@ challengePassword      = %s
             if DMail != False:
                 Mail = self.get_email(self.host, 'root')
             else:
-                raise SyntaxWarning('Error making key (Mail) ....')                
+                raise SyntaxWarning('Error making key (Mail) ....')
             cfgkey = self.make_key_config(2048, self.host, OU, self.host, Mail)
             # print "PATH SLL B =", path
-            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(path, self.host)) + ".key -out %s\\" %(os.path.join(path, self.host)) + ".crt -config " + cfgkey)          
+            os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s\\" %(os.path.join(path, self.host)) + ".key -out %s\\" %(os.path.join(path, self.host)) + ".crt -config " + cfgkey)
             #os.system("openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout d:\WWW\SSLCertificateKeyFile\\" + self.host + ".key -out " + str(path) + self.host + ".crt")
             return True
 
@@ -280,8 +277,8 @@ challengePassword      = %s
         else:
             path = path
             self.writeconf('PATH','VHOST',path)
-            return path    
-        
+            return path
+
     def checkSVC(self,svcname, quiet=None):
         if sys.platform == 'win32':
             try:
@@ -298,7 +295,7 @@ challengePassword      = %s
                         print "\n"
                         print "\t Service " + str(svcname) + " is " + srvname.status()
                         print "\n"
-                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
                         return True
                     elif s == "n" or s == "N":
                         print "\n"
@@ -312,7 +309,7 @@ challengePassword      = %s
                         print "\n"
                         print " You Not select y/n (SKIPPED)!"
                         print "\n"
-                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
                         return False
                 elif srvname.status() == "STARTING":
                     print "\t Service " + str(svcname) + " is " + srvname.status()
@@ -329,7 +326,7 @@ challengePassword      = %s
                         print "\n"
                         print "\t Service " + str(svcname) + " is " + srvname.status()
                         print "\n"
-                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
                         return True
                     elif s == "n" or s == "N":
                         print "\n"
@@ -343,13 +340,13 @@ challengePassword      = %s
                         print "\n"
                         print " You Not select y/n (SKIPPED)!"
                         print "\n"
-                        print "--------------script by LICFACE <licface@yahoo.com>---------------"                    
+                        print "--------------script by LICFACE <licface@yahoo.com>---------------"
                         return False
-                return True            
+                return True
             except SyntaxError:
                 APath = raw_input(" Please Definition Web Server Service Name\n (example: apache2.4|httpd|xginx): ")
                 self.writeconf('SERVER','SERVERSVC',APath)
-                self.checkSVC(APath, quiet)    
+                self.checkSVC(APath, quiet)
         return False
 
     def qAPath(self,sname=None, quiet=None):
@@ -360,7 +357,7 @@ challengePassword      = %s
                 self.checkSVC(APath, quiet)
             else:
                 svcname = self.cfg.get('SERVER','SERVERSVC')
-                self.checkSVC(svcname, quiet)   
+                self.checkSVC(svcname, quiet)
         else:
             self.checkSVC(sname, quiet)
 
@@ -419,19 +416,19 @@ challengePassword      = %s
             if self.path == None:
                 self.path = path
             if email == '' or email == None:
-                email = "root@"            
+                email = "root@"
             if "root@" not in email:
                 self.email = email
             else:
                 self.email = email + host
-                
+
             self.masterpath = self.qMPath()
             SLL_PATH = self.getCfg('PATH', 'sslpath')
             if dindex != None:
                 dindex = "DirectoryIndex %s" %(dindex)
             else:
                 dindex = "# DirectoryIndex index.html"
-                
+
             vhostNote = """<VirtualHost *:80>
 ServerAdmin %s
 DocumentRoot "%s"
@@ -456,19 +453,20 @@ SSLProtocol -all +TLSv1 +SSLv3
 SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SSLCertificateFile "%s/%s.crt"
     SSLCertificateKeyFile  "%s/%s.key"
-    #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/${APACHE_LOG_DIR}/ssl_scache(512000)"
-    SSLSessionCacheTimeout 600   
+    #SSLSessionCache        "shmcb:${APACHE_LOG_DIR}/ssl_scache(512000)"
+    SSLSessionCacheTimeout 600
     <IfModule mime.c>
     AddType application/x-x509-ca-cert      .crt
     AddType application/x-pkcs7-crl         .crl
 </IfModule>
     SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+    DocumentRoot %s
     ServerName %s
     ServerAlias www.%s
     ErrorLog "${APACHE_LOG_DIR}/vhost/%s.https-error.log"
     CustomLog "${APACHE_LOG_DIR}/vhost/%s.https-access.log" common
 </VirtualHost>
-    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, SLL_PATH, self.host, SLL_PATH,self.host,self.host,self.host,self.host,self.host)
+    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, SLL_PATH, self.host, SLL_PATH,self.host, self.path, self.host,self.host,self.host,self.host)
             self.logme('open file vhost mode: write', verbosity, 'info')
             vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
             self.logme('write file vhost', verbosity, 'info')
@@ -478,7 +476,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             if adddns:
                 self.logme('add host', verbosity, 'info')
                 if sys.platform == 'win32':
-                    addhost.main(ipAll, self.host, passwd_sdns)            
+                    addhost.main(ipAll, self.host, passwd_sdns)
             self.logme('make SSL Key', verbosity, 'info')
             self.keymaker(quiet=quiet)
             self.logme('Verify file vhost apache config', verbosity, 'info')
@@ -508,8 +506,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                 else:
                     port = port
             else:
-                port = port        
-        
+                port = port
+
             proxyNote = """<VirtualHost *:80>
     <Proxy *:%s>
         Require all granted
@@ -540,8 +538,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         SSLCertificateFile "%s/%s.crt"
         SSLCertificateKeyFile  "%s/%s.key"
-        #SSLSessionCache        "shmcb:c:/wamp/bin/apache/Apache2.4.4/${APACHE_LOG_DIR}/ssl_scache(512000)"
-        SSLSessionCacheTimeout 600   
+        #SSLSessionCache        "shmcb:${APACHE_LOG_DIR}/ssl_scache(512000)"
+        SSLSessionCacheTimeout 600
         <IfModule mime.c>
         AddType application/x-x509-ca-cert      .crt
         AddType application/x-pkcs7-crl         .crl
@@ -563,7 +561,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             self.logme('write config temp', verbosity, 'info')
             proxyFile.write(proxyNote)
             self.logme('close config temp', verbosity, 'info')
-            proxyFile.close()    
+            proxyFile.close()
             if adddns:
                 if sys.platform == 'win32':
                     addhost.main(ipAll, self.host, passwd_sdns)
@@ -589,7 +587,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                 except:
                     if verbosity:
                         print " ERROR:", traceback.format_exc()
-    
+
         for s in listdir_SSL:
             if hostname + ".crt" in s:
                 try:
@@ -597,15 +595,15 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                 except:
                     if verbosity:
                         print " ERROR:", traceback.format_exc()
-    
+
         for k in listdir_SSL:
             if hostname + ".key" in k:
                 try:
                     os.remove(os.path.join(PATH_SSL, k))
                 except:
                     if verbosity:
-                        print " ERROR:", traceback.format_exc()        
-    
+                        print " ERROR:", traceback.format_exc()
+
     def usage(self):
         print "\n"
         prog = "vhostmaker"
@@ -615,7 +613,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         usage_proxy="%s HOST proxy [options]"%(os.path.basename(__file__))
         usage_dns="%s HOST dns [options]"%(os.path.basename(__file__))
         # usage_proxy="%s HOST [options]"%(os.path.basename(__file__))
-    
+
         parser = argparse.ArgumentParser(prog=prog, usage=usage)
         # parser.add_argument('TYPE', help="Type (vhost|proxy)", action="store", choices=choices, type=str)
         parser.add_argument("HOST", help="Add host (example: myhost.com) or type 'update' for Update IP on SDSN Server (-U)", action="store", type=str)
@@ -627,16 +625,16 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         parser.add_argument('-ipDNS', "--ipSDNS", help="IP SimpleDNS Server ", default='127.0.0.1', action="store", type=str)
         parser.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         parser.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
-    
+
         subparser = parser.add_subparsers(title='TYPE', dest='TYPE')
-    
+
         args_vhost = subparser.add_parser('vhost', help='Virtual Host Type "vhost"')
         args_vhost.usage = usage_vhost
         args_proxy = subparser.add_parser('proxy', help='Virtual Host Type "proxy"')
         args_proxy.usage = usage_proxy
         args_dns = subparser.add_parser('dns', help="Add Host to SDNS Server")
         args_dns.usage = usage_dns
-    
+
         args_vhost.add_argument("-t", '--path', help="Path where Document Root or File Website/Site is stored\nThis used for VirtualHost", action="store", type=str, dest="PATH")
         args_vhost.add_argument("-i", "--directoryindex", help="Add section \"DirectoryIndex\"", action="store", type=str)
         args_vhost.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
@@ -648,7 +646,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_vhost.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         args_vhost.add_argument('-ip', "--ip", help="IP Host to used ",action="store", type=str)
         args_vhost.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
-    
+
         args_proxy.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
         args_proxy.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used default: 80 ",action="store", type=int, default=80)
         args_proxy.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
@@ -659,7 +657,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_proxy.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='root@')
         args_proxy.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         args_proxy.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
-    
+
         args_dns.add_argument('-A', '--ipA', help='ip address A', action='store')
         args_dns.add_argument('-NS', '--ipNS', help='ip address NS', action='store')
         args_dns.add_argument('-WWW', '--ipWWW', help='ip address WWW', action='store')
@@ -688,14 +686,14 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                 args_dns.parse_args(['dns', '-h'])
             elif sys.argv[-1] == "-s":
                 args = parser.parse_args()
-                self.host_search(args.HOST)            
+                self.host_search(args.HOST)
             parser.print_help()
-        
+
         else:
             #print "len(args) =", len(sys.argv)
             args = parser.parse_args()
             # print "args X =", args
-    
+
             if args.TYPE == "vhost": #Virtual Host (VHOST)
                 if args.ip:
                     args.adddns = True
@@ -710,7 +708,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                         print "\n"
                         parser.print_help()
                 elif args.search:
-                    self.host_search(args.HOST)                
+                    self.host_search(args.HOST)
                 else:
                     if args.delete:
                         self.del_host(args.HOST, args.verbosity)
@@ -722,22 +720,22 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                                 if args.verbosity:
                                     print traceback.format_exc()
                     elif args.search:
-                        self.host_search(args.HOST)                    
+                        self.host_search(args.HOST)
                     else:
                         print "\n"
                         print "\tPlease Insert your PATH !"
                         print "\n"
                         parser.print_help()
-    
+
             elif args.TYPE == "proxy": #Proxy
                 if args.HOST:
                     if args.delete:
                         self.del_host(args.HOST, args.verbosity)
                     if args.search:
-                        self.host_search(args.HOST)                    
+                        self.host_search(args.HOST)
                     if args.ip:
                         args.adddns = True
-    
+
                         if args.port:
                             if isinstance(args.port, int):
                                 if args.email:
@@ -766,13 +764,13 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                         print "\n"
                         parser.print_help()
                 elif args.search:
-                    self.host_search(args.HOST)                
+                    self.host_search(args.HOST)
                 else:
                     print "\n"
                     print "\tPlease insert HOST name !"
                     print "\n"
                     parser.print_help()
-    
+
             elif args.TYPE == 'dns':
                 # print "args =", args
                 if sys.platform == 'win32':
@@ -781,7 +779,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     if str(args.HOST).lower() == "update":
                         c_addhost.updateZone(args.ipaddress)
                     if args.search:
-                        self.host_search(args.HOST)                
+                        self.host_search(args.HOST)
                     if args.remove:
                         c_addhost.del_zone(args.HOST)
                     if args.all:
@@ -800,13 +798,13 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                             else:
                                 c_addhost.add(args.host, args.port, args.ipA, args.ipNS, args.ipWWW, args.ipMX, args.ipFTP, args.ipMAIL, args.host, args.password, args.email, args.datax, args.verbosity)
             elif args.search:
-                self.host_search(args.HOST)            
+                self.host_search(args.HOST)
             else:
                 print "\n"
                 print "\tPlase select your TYPE !"
                 print "\n"
                 parser.print_help()
-    
+
     def split(self, data):
         #print "DATA =", data
         list_updown = []
@@ -862,7 +860,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                                         #print "d001[i2]       =", d001[i2]
                                         index_down = i2 - 1
                                         #print "i2 - 1         =", i2 - 1
-                                                                
+
                                         #print "index_up       =", index_up
                                         #print "index_down     =", index_down
                                         list_updown.append((b[0], index_up, index_down))
@@ -872,13 +870,13 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                                 if b[0][0] == "<":
                                     pass
                                 elif len(b) ==1:
-                                    pass                        
+                                    pass
                                 else:
                                     print "\t" + b[0] + (25 - len(b[0]))*' ' + " =", (" ".join(b[1:])).strip()
-                                    
+
         #print "config"
         #print "list_updown =", list_updown
-        for x in list_updown:                            
+        for x in list_updown:
             #print "x =", x
             for z in range(x[1], x[2] + 1):
                 #print d001[z]
@@ -889,7 +887,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                         pass
                     else:
                         config_01.get(x[0]).append(y)
-                        
+
         #print "\n"
         #print "config_01 =",config_01
         print "\n"
@@ -900,7 +898,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     print "\t" + i + (25 - len(i))*' ' + " =", a
             else:
                 print "\t" + i + (25 - len(i))*' ' + " =", config_01.get(i)[0]
-    
+
     def host_search(self, search):
         if os.path.isdir(self.getCfg('PATH', 'master')):
             list_host = os.listdir(self.getCfg('PATH', 'master'))
@@ -910,8 +908,8 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     #print "F =", f
                     self.split(f)
                     #f.close()
-                    
-        
+
+
 
 if __name__ == "__main__":
     vhostmaker = maker()
