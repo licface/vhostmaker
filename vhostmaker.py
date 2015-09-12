@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import sys
 import argparse
@@ -13,7 +15,7 @@ import traceback
 
 __author__ = "licface@yahoo.com"
 __version__ = "2.0"
-__test__ = "0.8"
+__test__ = "0.9"
 __sdk__ = "2.7"
 __build__ =  "windows"
 __platform_test__ = 'nt'
@@ -409,7 +411,7 @@ challengePassword      = %s
                 else:
                     return self.logger.debug(msg, extra=myextra)
 
-    def vhost(self, host, path ,email="root@", dindex=None, checkpass=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None, quiet=None):
+    def vhost(self, host, path ,email="root@", dindex=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None, quiet=None, addhandle = None, handletype = None, handlefile = None, include = None):
         try:
             if self.host == None:
                 self.host = host
@@ -428,6 +430,15 @@ challengePassword      = %s
                 dindex = "DirectoryIndex %s" %(dindex)
             else:
                 dindex = "# DirectoryIndex index.html"
+                
+            if handlefile:
+                if addhandle:
+                    if handletype != None:
+                        if handlefile != None:
+                            handlefile = " ".join(handlefile)
+                            handle = "AddHandle %s %s" % (handletype, handlefile)
+            else:
+                handle = "# AddHandle "
 
             vhostNote = """<VirtualHost *:80>
 ServerAdmin %s
@@ -436,6 +447,7 @@ ServerName %s
 ServerAlias www.%s
 ErrorLog "${APACHE_LOG_DIR}/vhost/%s-error.log"
 CustomLog "${APACHE_LOG_DIR}/vhost/%s-access.log" common
+%s
 %s
 Options Indexes FollowSymLinks
 </VirtualHost>
@@ -466,7 +478,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
     ErrorLog "${APACHE_LOG_DIR}/vhost/%s.https-error.log"
     CustomLog "${APACHE_LOG_DIR}/vhost/%s.https-access.log" common
 </VirtualHost>
-    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, SLL_PATH, self.host, SLL_PATH,self.host, self.path, self.host,self.host,self.host,self.host)
+    """%(self.email,self.path,self.host,self.host,self.host,self.host, dindex, handle, SLL_PATH, self.host, SLL_PATH,self.host, self.path, self.host,self.host,self.host,self.host)
             self.logme('open file vhost mode: write', verbosity, 'info')
             vhostFile = open(os.path.join(self.masterpath,host)+".conf","w")
             self.logme('write file vhost', verbosity, 'info')
@@ -481,13 +493,14 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             self.keymaker(quiet=quiet)
             self.logme('Verify file vhost apache config', verbosity, 'info')
             if sys.platform == 'win32':
-                if self.includeVhost(verbosity=verbosity) == True:
-                    self.includeVhost(verbosity=verbosity)
+                if include:
+                    if self.includeVhost(verbosity=verbosity) == True:
+                        self.includeVhost(verbosity=verbosity)
             self.qAPath(quiet=quiet)
         except:
             self.logme('', verbosity, 'error', True)
 
-    def proxy(self, host, port, email="root@", ip=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None, quiet=None):
+    def proxy(self, host, port, email="root@", ip=None, adddns=None, verbosity=None, ipAll=None, passwd_sdns=None, quiet=None, include = None):
         try:
             if self.host == None:
                 self.host = host
@@ -568,7 +581,9 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             self.keymaker(quiet=quiet)
             #if self.includeVhost(verbosity=verbosity) == True:
             if sys.platform == 'win32':
-                self.includeVhost(verbosity=verbosity)
+                print "Include =", include
+                if include:
+                    self.includeVhost(verbosity=verbosity)
             self.qAPath(quiet=quiet)
         except Exception, exc:
             print "\n"
@@ -625,6 +640,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         parser.add_argument('-ipDNS', "--ipSDNS", help="IP SimpleDNS Server ", default='127.0.0.1', action="store", type=str)
         parser.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         parser.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
+        parser.add_argument('-I', '--include', help = 'Include config to extra/httpd-vhost config file', action = 'store_true')
 
         subparser = parser.add_subparsers(title='TYPE', dest='TYPE')
 
@@ -646,8 +662,12 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_vhost.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         args_vhost.add_argument('-ip', "--ip", help="IP Host to used ",action="store", type=str)
         args_vhost.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
+        args_vhost.add_argument('-A', '--handle', help = "Add handle type", action = 'store_true')
+        args_vhost.add_argument('-T', '--handle-type', help = "Handle type", action = 'store')
+        args_vhost.add_argument('-F', '--handle-file', help = "Handle file type, example: .cgi .pl", action = "store", nargs = "*")
+        args_vhost.add_argument('-I', '--include', help = 'Include config to extra/httpd-vhost config file', action = 'store_true')
 
-        args_proxy.add_argument('-ip', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
+        args_proxy.add_argument('-i', "--ip", help="IP Host Proxy Reverse/Pass to used ",action="store", type=str)
         args_proxy.add_argument('-p', "--port", help="Port Proxy Reverse/Pass to used default: 80 ",action="store", type=int, default=80)
         args_proxy.add_argument('-q', '--quiet', help="by pass confirmation other options, by answer 'yes'", action="store_true")
         args_proxy.add_argument('-n', '--adddns', help="add generate DNS Host", action="store_true")
@@ -657,6 +677,7 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
         args_proxy.add_argument('-e', '--email',help="Email ServerAdmin (example: root@myhost.com), default: root@HOST", action="store", default='root@')
         args_proxy.add_argument('-d', '--delete', help="Del Host/Proxy", action="store_true")
         args_proxy.add_argument('-s', '--search', help="Search Configuration of Host", action='store_true')
+        args_proxy.add_argument('-I', '--include', help = 'Include config to extra/httpd-vhost config file', action = 'store_true')
 
         args_dns.add_argument('-A', '--ipA', help='ip address A', action='store')
         args_dns.add_argument('-NS', '--ipNS', help='ip address NS', action='store')
@@ -695,11 +716,11 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
             # print "args X =", args
 
             if args.TYPE == "vhost": #Virtual Host (VHOST)
-                if args.ip:
-                    args.adddns = True
+                #if args.ip:
+                    #args.adddns = True
                 if args.PATH:
                     if os.path.isdir(args.PATH):
-                        self.vhost(args.HOST, args.PATH, args.email, dindex=args.directoryindex, adddns=args.adddns, verbosity=args.verbosity, ipAll=args.ip, passwd_sdns=args.password)
+                        self.vhost(args.HOST, args.PATH, args.email, args.directoryindex, args.adddns, args.verbosity, args.ip, args.password, args.quiet, args.handle, args.handle_type, args.handle_file, args.include)
                     elif args.search:
                         self.host_search(args.HOST)
                     else:
@@ -734,20 +755,20 @@ SSLCipherSuite HIGH:MEDIUM:!aNULL:+SHA1:+MD5:+HIGH:+MEDIUM
                     if args.search:
                         self.host_search(args.HOST)
                     if args.ip:
-                        args.adddns = True
+                        #args.adddns = True
 
                         if args.port:
                             if isinstance(args.port, int):
                                 if args.email:
                                     if "@" in args.email:
-                                        self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password)
+                                        self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password, args.quiet, args.include)
                                     else:
                                         print "\n"
                                         print "\t Please Insert Correct EMAIL !"
                                         print "\n"
                                         parser.print_help()
                                 else:
-                                    self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password)
+                                    self.proxy(args.HOST, str(args.port), args.email, args.ip, args.adddns, args.verbosity, args.ip, args.password, args.quiet, args.include)
                             else:
                                 print "\n"
                                 print "\tPlease insert PORT Number !"
